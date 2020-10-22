@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window caption="0,0,0,37" roundcorner="5,5,5,5" sizebox="4,4,4,4" mininfo="300,320">
+ <Font name="宋体" size="13" bold="false"/>
+ <Font name="宋体" size="12"/>
+ <Font name="宋体" size="12" bold="true"/>
+ <Font name="宋体" size="6" bold="true"/>
+<Default name="VScrollBar" value="button1normalimage=&quot;file='scroll.png' source='0,0,16,16'&quot; button1hotimage=&quot;file='scroll.png' source='0,0,16,16' mask='#FFFF00FF'&quot; button1pushedimage=&quot;file='scroll.png' source='0,16,16,32' mask='#FFFF00FF'&quot; button1disabledimage=&quot;file='scroll.png' source='0,0,16,16' mask='#FFFF00FF'&quot; button2normalimage=&quot;file='scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; button2hotimage=&quot;file='scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; button2pushedimage=&quot;file='scroll.png' source='0,48,16,64' mask='#FFFF00FF'&quot; button2disabledimage=&quot;file='scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; thumbnormalimage=&quot;file='scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbhotimage=&quot;file='scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbpushedimage=&quot;ffile='scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbdisabledimage=&quot;file='scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; railnormalimage=&quot;file='scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; railhotimage=&quot;file='scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; railpushedimage=&quot;file='scroll.png' source='0,96,16,112' corner='2,2,2,2' mask='#FFFF00FF'&quot; raildisabledimage=&quot;file='scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; bknormalimage=&quot;file='scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkhotimage=&quot;file='scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkpushedimage=&quot;file='scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkdisabledimage=&quot;file='scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; " />
+<VerticalLayout bkimage="file='Data/skin/chinesestyle/bg.jpg' corner='10,37,10,10'" bkcolor="#FF313C00">
+	<HorizontalLayout height="37" inset="0,2,0,0">
+		<HorizontalLayout>
+			<Label float="true" pos="10,0,47,37" bkimage="file='Data/skin/image/head.jpg'"></Label>
+            <Text text="潇洒" textcolor="#FFFFFFFF" font="0" float="true" pos="52,12,125,37"></Text>
+		</HorizontalLayout>
+        <VerticalLayout inset="0, 12, 0, 0">
+			<Label text="" textcolor="#VerticalLayout" font="2"></Label>
+		</VerticalLayout>
+		<VerticalLayout width="70">
+			<Button float="true" pos="28,0,56,28" name="closebtn" maxwidth="28" maxheight="28" normalimage="file='Data/skin/image/btn_title_close.png'" hotimage="file='Data/skin/image/btn_title_close.png'" pushedimage="file='Data/skin/image/btn_title_close.png'"/>
+		</VerticalLayout>
+	</HorizontalLayout>
+	<HorizontalLayout>
+        <HorizontalLayout width="260" bkcolor="#60FFFFFF">
+            <VerticalLayout>
+                <HorizontalLayout height="27">
+                    <Option pos="0, 0, 130, 26" float="true" text="本地媒体库" name="offline" textcolor="#FFFFFFFF" font="2" normalimage="Data/skin/image/tabbar_normal.png" hotimage="Data/skin/image/tabbar_hover.png" pushedimage="Data/skin/image/tabbar_pushed.png" selectedimage="Data/skin/image/tabbar_pushed.png" group="contenttab" selected="true"/>
+                    <Option pos="131, 0, 260, 26" float="true" text="在线媒体库" name="online" textcolor="#FFFFFFFF" font="2" normalimage="Data/skin/image/tabbar_normal.png" hotimage="Data/skin/image/tabbar_hover.png" pushedimage="Data/skin/image/tabbar_pushed.png" selectedimage="Data/skin/image/tabbar_pushed.png" group="contenttab"/>
+                </HorizontalLayout>
+                <HorizontalLayout>
+                    <TabLayout name="switch">
+                        <HorizontalLayout>
+                            <OfflineTab />
+                        </HorizontalLayout>
+                        <HorizontalLayout>
+                            <OnlineTab />
+                        </HorizontalLayout>
+                   </TabLayout>
+                </HorizontalLayout>
+            </VerticalLayout>
+        </HorizontalLayout>
+        <HorizontalLayout bkcolor="#60313A0F">
+            <RightPanel />
+        </HorizontalLayout>
+	</HorizontalLayout>
+</VerticalLayout>
+</Window>

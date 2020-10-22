@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window>
+  <ListContainerElement>
+    <VerticalLayout>
+      <HorizontalLayout height="32">
+        <HorizontalLayout>
+          <VerticalLayout name="logo_container" width="35">
+            <Label name="media_image" width="32" height="32" />
+          </VerticalLayout>
+          <VerticalLayout >
+            <HorizontalLayout height="20">
+              <Label name="media_name" bordersize="0" width="120" textcolor="#FF000000" disabledtextcolor="#FF808080" />
+              <HorizontalLayout />
+              <Label name="artist_name" bordersize="0" textcolor="#FF808080" />
+            </HorizontalLayout>
+            <HorizontalLayout>
+              <Button name="media_store" maxwidth="12" maxheight="12" />
+              <Label name="play_status" textcolor="#FF808080" />
+            </HorizontalLayout>
+          </VerticalLayout>
+        </HorizontalLayout>
+      </HorizontalLayout>
+    </VerticalLayout>
+  </ListContainerElement>
+</Window>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+<VerticalLayout>
+    <HorizontalLayout  bkcolor="#20FFFFFF">
+        <MediaList name="offline_list" inset="0,0,0,0" itemshowhtml="true" vscrollbar="true" hscrollbar="true" itemalign="center" hscrollbar="false" menu="true">
+        </MediaList>
+    </HorizontalLayout>
+</VerticalLayout>
+</Window>

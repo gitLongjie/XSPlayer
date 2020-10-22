@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+    <VerticalLayout>
+        <HorizontalLayout inset="3,0,3,3" bkcolor="#20FFFFFF">
+        </HorizontalLayout>
+        <HorizontalLayout height="70">
+            <VerticalLayout>
+                <HorizontalLayout height="10">
+                    <Slider name="player_slider" height="10" min="0" max="100" value="0" step="1" foreimage="Data/skin/image/play_process.png" bkimage="Data/skin/image/play_process_bk.png" isstretchfore="false" thumbimage="Data/skin/image/play_process_thumb_normal.png" thumbhotimage="file='Data/skin/image/play_process_thumb.png' "  thumbpushedimage="Data/skin/image/play_process_thumb_normal.png" thumbsize="10,10" sendmove="false" />                     
+                </HorizontalLayout>
+                <HorizontalLayout height="10">
+                    <HorizontalLayout width="10"/>
+                    <Label name="player_time" text="" width="60" textcolor="#FFFFFFFF"></Label>
+                    <HorizontalLayout />
+                    <Label name="player_totol_time" text="" width="60" textcolor="#FFFFFFFF"></Label>
+                </HorizontalLayout>
+                <HorizontalLayout>
+                    <Control />
+                    <Button name="btnMediaPlay" maxwidth="50" maxheight="50" normalimage="file='Data/skin/image/play.png'" hotimage="file='Data/skin/image/play.png'" pushedimage="file='Data/skin/image/play.png'"/>
+                    <Control />
+                </HorizontalLayout>
+            </VerticalLayout>
+        </HorizontalLayout>
+    </VerticalLayout>
+</Window>

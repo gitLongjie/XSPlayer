@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+<VerticalLayout>
+    <HorizontalLayout inset="6,0,6,0" bkimage="file='Data/skin/image/search_edit.png'" height="25">
+        <VerticalLayout inset="0,3,0,0" >
+            <Edit text="输入媒体名称或者歌手名字搜素" textpadding="5,0,1,0" borderround="5,5" bkcolor="#00FFFFFF" nativebkcolor="#00FFFFFF" focusbordercolor="#FFFF0000" textcolor="#FFFFFFFF" font="1"></Edit>
+        </VerticalLayout>
+        <VerticalLayout width="26" inset="0,6,10,0">
+            <Button maxheight="16" maxwidth="16" normalimage="file='Data/skin/image/search_btn.png'" hotimage="file='Data/skin/image/search_btn.png'" pushedimage="file='Data/skin/image/search_btn.png'"></Button>
+        </VerticalLayout>
+    </HorizontalLayout>
+    <HorizontalLayout bkcolor="#20FFFFFF">
+        <MediaList name="online_list" inset="0,0,0,0" itemshowhtml="true" vscrollbar="true" hscrollbar="true" itemalign="center" hscrollbar="false" menu="true">
+        </MediaList>
+    </HorizontalLayout>
+</VerticalLayout>
+</Window>
