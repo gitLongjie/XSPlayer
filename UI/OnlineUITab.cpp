@@ -15,25 +15,9 @@
 #include "UI/Menu.h"
 #include "UI/MediaList.h"
 #include "UI/ListItem.h"
+#include "UI/BuildCallback.h"
 
 namespace XSPlayer {
-
-    class OfflineTabBuildCallback : public DuiLib::IDialogBuilderCallback {
-    public:
-        OfflineTabBuildCallback(DuiLib::CPaintManagerUI* pPaintManagerUI) : m_pPaintManagerUI(pPaintManagerUI) {
-
-        }
-
-        DuiLib::CControlUI* CreateControl(LPCTSTR pstrClass) {
-            if (0 == _tcsicmp(pstrClass, kMediaListUI)) {
-                return new MediaList(m_pPaintManagerUI);
-            }
-            return nullptr;
-        }
-
-    private:
-        DuiLib::CPaintManagerUI* m_pPaintManagerUI;
-    };
 
     OnlineUITab::OnlineUITab(DuiLib::CPaintManagerUI* pPaintManagerUI) : supper() {
         Init(pPaintManagerUI);
@@ -142,7 +126,7 @@ namespace XSPlayer {
 
     void OnlineUITab::Init(DuiLib::CPaintManagerUI* pPaintManagerUI) {
         DuiLib::CDialogBuilder dailogBuilder;
-        OfflineTabBuildCallback callback(pPaintManagerUI);
+        BuildCallback callback(pPaintManagerUI);
         DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/online_tab.xml"), (UINT)0, &callback));
         if (nullptr != pContainerUI) {
             Add(pContainerUI);
