@@ -19,15 +19,23 @@ namespace XSPlayer {
         MediaContainer* GetMediaContainer(void) const override;
 
     public:
-        bool BuilderMediaContents(MediaContainer* pMediaContainer, MediaSourceCallback* pCallback);
-        bool BuilderMediaByType(MediaContainer* pMediaContainer, MediaSourceCallback* pCallback);
+        bool BuilderMediaContents(MediaContainer* pMediaContainer,
+                                  MediaSourceCallback* pCallback,
+                                  MediaSourceWPtr pWMediaSource);
+        bool BuilderMediaByType(MediaContainer* pMediaContainer,
+                                MediaSourceCallback* pCallback,
+                                MediaSourceWPtr pWMediaSource);
         void Test();
 
     protected:
-        bool ParseMediaContents(const String& content, MediaContainer* pMediaContainer,
-                                MediaSourceCallback* pCallback);
-        bool ParseMediaItems(const String& content, MediaContainer* pMediaContainer,
-                             MediaSourceCallback* pCallback);
+        bool ParseMediaContents(const String& content,
+                                MediaContainer* pMediaContainer,
+                                MediaSourceCallback* pCallback,
+                                MediaSourceWPtr pWMediaSource);
+        bool ParseMediaItems(const String& content,
+                             MediaContainer* pMediaContainer,
+                             MediaSourceCallback* pCallback,
+                             MediaSourceWPtr pWMediaSource);
         bool ParseMedia(const String& content, MediaContainer* pMediaContainer,
                              MediaSourceCallback* pCallback);
 

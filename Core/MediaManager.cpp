@@ -13,6 +13,7 @@
 namespace XSPlayer {
 
     template<> MediaManager* Singleton<MediaManager>::m_pSingleton = nullptr;
+    std::atomic<size_t> MediaManager::m_meidaCount = 0;
 
     MediaManager::MediaManager(void) {
         Init();
@@ -37,14 +38,20 @@ namespace XSPlayer {
             return false;
         }
 
-        const String& path = GetMediaPath(m_currentPlayMedia);
+        Media* pMedia = GetMedia(m_currentPlayMedia);
+        if (nullptr == pMedia) {
+            return nullptr;
+        }
+        const String& path = pMedia->GetMediaPath();
         PlayControlRequest playControl;
         if (!playControl.Play(path)) {
             return false;
         }
 
-        String name = GetMedia(m_currentPlayMedia);
+        String name = pMedia->GetText();
         m_pMediaHandleChane->NextHandleRequest(&playControl);
+        NotifyEvent(EnventNotify::Event::MM_PLAY, pMedia);
+
 //        m_sqliteHelper.UpdateCurrentMedia(path);
         return true;
     }
@@ -138,7 +145,7 @@ namespace XSPlayer {
         return pMedia->GetMediaPath();
     }
 
-    String MediaManager::GetMedia(const size_t mediaID) {
+    String MediaManager::GetMediaName(const size_t mediaID) {
         assert(nullptr != m_pRoot);
 
         Media* pMedia = m_pRoot->Find(mediaID);
@@ -147,6 +154,12 @@ namespace XSPlayer {
         }
 
         return pMedia->GetText();
+    }
+
+    Media* MediaManager::GetMedia(const size_t mediaID) {
+        assert(nullptr != m_pRoot);
+
+        return m_pRoot->Find(mediaID);
     }
 
     int MediaManager::GetMediaCount(void) const {
@@ -189,6 +202,18 @@ namespace XSPlayer {
          return medaiId;
     }
 
+
+    bool MediaManager::RegistEvent(EnventNotify* pEvent) {
+        m_listEvent.insert(pEvent);
+        return true;
+    }
+
+
+    bool MediaManager::UnregistEvent(EnventNotify* pEvent) {
+        m_listEvent.erase(pEvent);
+        return true;
+    }
+
     bool MediaManager::AddMediaSource(MediaSourceFactory* pMediaSourceFactory,
                                       MediaSourceCallback* pCallback) {
         if (nullptr == pMediaSourceFactory) {
@@ -219,4 +244,11 @@ namespace XSPlayer {
     void MediaManager::Init(void) {
         m_pRoot = new MediaContainer("root");
     }
+
+    void MediaManager::NotifyEvent(EnventNotify::Event event, Media* pMedia) {
+        for (auto& item : m_listEvent) {
+            item->OnNotify(event, pMedia);
+        }
+    }
+
 }

@@ -17,12 +17,13 @@
 namespace XSPlayer {
 
     MainFrame::MainFrame() : supper() {
-
+        MediaManager::GetSingleton().RegistEvent(this);
     }
 
     MainFrame::~MainFrame() {
         m_trayIcon.hIcon = NULL;
         Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
+        MediaManager::GetSingleton().UnregistEvent(this);
     }
 
     void MainFrame::InitWindow() {
@@ -64,7 +65,7 @@ namespace XSPlayer {
 
         case WM_CHANGE_CUR_PLAY:
         {
-            String curPlayTitle = MediaManager::GetSingleton().GetMedia(MediaManager::GetSingleton().GetCurrentPlay());
+            String curPlayTitle = MediaManager::GetSingleton().GetMediaName(static_cast<size_t>(lParam));
             m_curPlayTitle = String(_T("正在播放:")) + curPlayTitle;
             DuiLib::CLabelUI* pTitle = dynamic_cast<DuiLib::CLabelUI*>(m_PaintManager.FindControl(_T("lbCurPlay")));
             if (nullptr != pTitle) {
@@ -142,6 +143,14 @@ namespace XSPlayer {
         return nullptr;
     }
 
+    void MainFrame::OnNotify(Event event, Media* pMedia) {
+        if (nullptr == pMedia) {
+            return;
+        }
+
+        PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
+    }
+
     void MainFrame::Init(void) {
         AudioRenderChainPtr pAudioRender = std::make_shared<AudioRenderChain>(nullptr, ThreadType::TT_UNKNOWN);
         DecodeHandleChainPtr pDecodeHandle = std::make_shared<DecodeHandleChain>(pAudioRender, ThreadType::TT_DECODE);
@@ -182,10 +191,11 @@ namespace XSPlayer {
     }
 
     void MainFrame::OnExit(DuiLib::TNotifyUI& msg) {
-//         MediaManager::GetSingleton().Stop();
-//         //退出程序
-//         ::PostQuitMessage(0);
-        ShowWindow(SW_HIDE);
+        MediaManager::GetSingleton().Stop();
+        m_trayIcon.hIcon = NULL;
+        Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);        
+        ::PostQuitMessage(0);
+ //       ShowWindow(SW_HIDE);
     }
 
     void MainFrame::OnSelectChanged(DuiLib::TNotifyUI& msg) {

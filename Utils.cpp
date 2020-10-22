@@ -32,7 +32,14 @@ namespace XSPlayer {
 
     std::string Utils::WStringToString(const std::wstring& str) {
         std::string temp(str.length(), ' ');
-        std::copy(str.begin(), str.end(), temp.begin());
+        auto first = str.begin();
+        auto last = str.end();
+        auto result = temp.begin();
+        while (first != last) {
+            *result = static_cast<char>(*first);
+            ++result; ++first;
+        }
+        
         return temp;
     }
 

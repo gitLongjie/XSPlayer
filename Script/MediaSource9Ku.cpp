@@ -35,22 +35,27 @@ namespace XSPlayer {
     }
 
     bool MediaSource9Ku::BuilderMediaContents(MediaContainer* pMediaContainer,
-                                              MediaSourceCallback* pCallback) {
+                                              MediaSourceCallback* pCallback,
+                                              MediaSourceWPtr pWMediaSource) {
         if (nullptr == m_pPyModule || nullptr == pMediaContainer) {
             return false;
         }
 
         String strContent;
-        if (!m_pPyModule->CallFunction(strContent, "getMusicContent")) {
-            return false;
+        {
+            MediaSourcePtr pThis = pWMediaSource.lock();
+            if (!m_pPyModule->CallFunction(strContent, "getMusicContent")) {
+                return false;
+            }
         }
 
-        return ParseMediaContents(strContent, pMediaContainer, pCallback);
+        return ParseMediaContents(strContent, pMediaContainer, pCallback, pWMediaSource);
     }
 
 
     bool MediaSource9Ku::BuilderMediaByType(MediaContainer* pMediaContainer,
-                                            MediaSourceCallback* pCallback) {
+                                            MediaSourceCallback* pCallback,
+                                            MediaSourceWPtr pWMediaSource) {
         if (nullptr == m_pPyModule || nullptr == pMediaContainer) {
             return false;
         }
@@ -58,11 +63,19 @@ namespace XSPlayer {
         PyAgrs args(1);
         args.Add(pMediaContainer->GetMediaPath().c_str());
         String strContent;
-        if (!m_pPyModule->CallFunction(strContent, "getMusicList", args)) {
-            return false;
-        }
+        {
+            MediaSourcePtr pThis = pWMediaSource.lock();
+            if (nullptr == pThis) {
+                return false;
+            }
 
-        return ParseMediaItems(strContent, pMediaContainer, pCallback);
+            if (!m_pPyModule->CallFunction(strContent, "getMusicList", args)) {
+                return false;
+            }
+        }
+        
+
+        return ParseMediaItems(strContent, pMediaContainer, pCallback, pWMediaSource);
     }
 
     void MediaSource9Ku::Test() {
@@ -77,9 +90,12 @@ namespace XSPlayer {
         }
     }
 
-    bool MediaSource9Ku::ParseMediaContents(const String& content, MediaContainer* pMediaContainer,
-                                            MediaSourceCallback* pCallback) {
-        if (nullptr == pMediaContainer) {
+    bool MediaSource9Ku::ParseMediaContents(const String& content,
+                                            MediaContainer* pMediaContainer,
+                                            MediaSourceCallback* pCallback,
+                                            MediaSourceWPtr pWMediaSource) {
+        MediaSourcePtr pThis = pWMediaSource.lock();
+        if (nullptr == pMediaContainer || nullptr == pThis) {
             return false;
         }
         rapidjson::Document doc;
@@ -114,9 +130,12 @@ namespace XSPlayer {
         return true;
     }
 
-    bool MediaSource9Ku::ParseMediaItems(const String& content, MediaContainer* pMediaContainer,
-                                         MediaSourceCallback* pCallback) {
-        if (nullptr == pMediaContainer) {
+    bool MediaSource9Ku::ParseMediaItems(const String& content,
+                                         MediaContainer* pMediaContainer,
+                                         MediaSourceCallback* pCallback,
+                                         MediaSourceWPtr pWMediaSource) {
+        MediaSourcePtr pThis = pWMediaSource.lock();
+        if (nullptr == pMediaContainer || nullptr == pThis) {
             return false;
         }
 
@@ -178,12 +197,11 @@ namespace XSPlayer {
     }
 
     void MediaSource9Ku::OnLoad(MediaSourceCallback* pCallback, MediaSourceWPtr pWMediaSource) {
-        MediaSourcePtr pThis = pWMediaSource.lock();
-        if (nullptr == pThis) {
+        if (nullptr == pWMediaSource.lock()) {
             return;
         }
 
-        if (!BuilderMediaContents(m_pMediaContainer, pCallback)) {
+        if (!BuilderMediaContents(m_pMediaContainer, pCallback, pWMediaSource)) {
             return;
         }
 
@@ -194,7 +212,7 @@ namespace XSPlayer {
                 continue;
             }
 
-            BuilderMediaByType(pMediaContent, pCallback);
+            BuilderMediaByType(pMediaContent, pCallback, pWMediaSource);
         }
     }
 

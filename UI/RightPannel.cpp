@@ -137,8 +137,6 @@ namespace XSPlayer {
         if (!OnPlayMedida(pControl)) {
             return false;
         }
-        
-        SendMessage(m_pManager->GetPaintWindow(), WM_CHANGE_CUR_PLAY, 0, (LPARAM)m_mediaSoruce);
         return true;
     }
    
@@ -157,8 +155,6 @@ namespace XSPlayer {
         if (!OnPlayMedida(pControl)) {
             return false;
         }
-
-        SendMessage(m_pManager->GetPaintWindow(), WM_CHANGE_CUR_PLAY, 0, (LPARAM)m_mediaSoruce);
         return true;
     }
 

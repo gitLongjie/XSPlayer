@@ -3,6 +3,7 @@
 #include "Contanst.h"
 #include "Core/Application.h"
 #include "Script/PyEnvironment.h"
+#include "Core/MediaManager.h"
 
 namespace XSPlayer {
 
@@ -10,7 +11,7 @@ namespace XSPlayer {
     class OnlineUITab;
     class RightPannel;
 
-    class MainFrame : public DuiLib::WindowImplBase, public Application {
+    class MainFrame : public DuiLib::WindowImplBase, public Application , public EnventNotify{
         using supper = DuiLib::WindowImplBase;
     public:
         MainFrame();
@@ -21,6 +22,8 @@ namespace XSPlayer {
         LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
         void Notify(DuiLib::TNotifyUI& msg) override;
         DuiLib::CControlUI* CreateControl(LPCTSTR pstrClass) override;
+
+        void OnNotify(Event event, Media* pMedia) override;
 
         void Init(void) override;
         UINT GetClassStyle() const override;
@@ -45,7 +48,7 @@ namespace XSPlayer {
         OnlineUITab* m_pOnlineUITab = nullptr;
         RightPannel* m_pRightPannel = nullptr;
 
-        NOTIFYICONDATA m_trayIcon;
+        NOTIFYICONDATA m_trayIcon = {};
         String m_curPlayTitle;
         PyEnvironment m_pyEnvironment;
     };
