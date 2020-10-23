@@ -143,12 +143,24 @@ namespace XSPlayer {
         return nullptr;
     }
 
-    void MainFrame::OnNotify(Event event, Media* pMedia) {
-        if (nullptr == pMedia) {
-            return;
+    bool MainFrame::OnNotify(const EventPtr& pEvent) {
+        auto pControlEvent = std::dynamic_pointer_cast<ControlEvent>(pEvent);
+        if (nullptr == pControlEvent) {
+            return false;
         }
 
-        PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
+        if (ControlEvent::EControl::EC_PLAY == pControlEvent->GetEC()) {
+            Media* pMedia = pControlEvent->GetMedia();
+            if (nullptr == pMedia) {
+                return false;
+            }
+
+            PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
+            return true;
+        }
+        
+
+        return false;
     }
 
     void MainFrame::Init(void) {

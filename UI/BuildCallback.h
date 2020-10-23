@@ -5,7 +5,7 @@
 
 namespace XSPlayer {
 
-    class BuildCallback : public DuiLib::IDialogBuilderCallback{
+    class BuildCallback : public DuiLib::IDialogBuilderCallback {
     public:
         BuildCallback(DuiLib::CPaintManagerUI* pPaintManagerUI);
         virtual ~BuildCallback();

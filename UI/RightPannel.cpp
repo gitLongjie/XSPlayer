@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Core/MediaManager.h"
+#include "UI/BuildCallback.h"
 
 namespace XSPlayer {
 
@@ -74,7 +75,8 @@ namespace XSPlayer {
 
     void RightPannel::Init(void) {
         DuiLib::CDialogBuilder dailogBuilder;
-        DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/right_pannel.xml"), (UINT)0));
+        BuildCallback callback(nullptr);;
+        DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/right_pannel.xml"), (UINT)0, &callback));
         if (nullptr != pContainerUI) {
             Add(pContainerUI);
         }

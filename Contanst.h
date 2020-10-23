@@ -26,6 +26,7 @@ namespace XSPlayer {
     extern const TCHAR* const kOnlineList;
 
     extern const TCHAR* const kOfflineSource;
+    extern const TCHAR* const kLrcPannel;
 
 #define MAX_AUDIO_FRAME_SIZE 192000 
 

@@ -14,6 +14,7 @@
 #include "Core/MediaHandleChain.h"
 #include "IO/SqliteHelper.h"
 #include "Core/MediaItem.h"
+#include "Core/Event.h"
 
 namespace XSPlayer {
 
@@ -21,16 +22,6 @@ namespace XSPlayer {
     struct MediaInfo {
         int nType;
         size_t nDuration;
-    };
-
-    class EnventNotify {
-    public:
-        enum class Event {
-            MM_PLAY
-        };
-    public:
-        virtual ~EnventNotify() {}
-        virtual void OnNotify(Event event, Media* pMedia) = 0;
     };
 
     using InforCallback = std::function<void(const MediaInfo& infor)>;
@@ -67,15 +58,15 @@ namespace XSPlayer {
 
         static size_t GenerateMeidaId(void);
 
-        bool RegistEvent(EnventNotify* pEvent);
-        bool UnregistEvent(EnventNotify* pEvent);
+        bool RegistEvent(EventHandle* pEvent);
+        bool UnregistEvent(EventHandle* pEvent);
+        bool NotifyEvent(const EventPtr& event);
 
     public:
         bool AddMediaSource(MediaSourceFactory* pMediaSourceFactory, MediaSourceCallback* pCallback);
 
     private:
         void Init(void);
-        void NotifyEvent(EnventNotify::Event event, Media* pMedia);
 
     private:
         MediaHandleChainPtr m_pMediaHandleChane;
@@ -84,7 +75,7 @@ namespace XSPlayer {
         MediaContainer* m_pRoot = nullptr;
         using ListMediaSourcePtr = std::unordered_map<MediaSourceType, MediaSourcePtr>;
         ListMediaSourcePtr m_listMediaSoruces;
-        using ListEvent = std::set<EnventNotify*>;
+        using ListEvent = std::set<EventHandle*>;
         ListEvent m_listEvent;
         static std::atomic<size_t> m_meidaCount;
     };

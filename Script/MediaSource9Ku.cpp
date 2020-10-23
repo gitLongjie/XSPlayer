@@ -118,7 +118,6 @@ namespace XSPlayer {
                 auto pMediaContent = new MediaContainer(type);
                 size_t mediaId = MediaManager::GetSingleton().GenerateMeidaId();
                 pMediaContent->SetMediaID(mediaId);
-                pMediaContent->SetMediaID(count);
                 pMediaContent->SetMediaPath(item["url"].GetString());
                 pMediaContainer->Add(pMediaContent);
                 if (nullptr != pCallback) {

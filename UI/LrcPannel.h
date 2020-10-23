@@ -12,5 +12,8 @@ namespace XSPlayer {
         LrcPannel();
         ~LrcPannel() override;
 
+    public:
+        bool DoPaint(HDC hDC, const RECT& rcPaint, DuiLib::CControlUI* pStopControl) override;
+
     };
 }

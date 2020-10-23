@@ -4,6 +4,7 @@
 #include "Core/Application.h"
 #include "Script/PyEnvironment.h"
 #include "Core/MediaManager.h"
+#include "Core/Event.h"
 
 namespace XSPlayer {
 
@@ -11,7 +12,7 @@ namespace XSPlayer {
     class OnlineUITab;
     class RightPannel;
 
-    class MainFrame : public DuiLib::WindowImplBase, public Application , public EnventNotify{
+    class MainFrame : public DuiLib::WindowImplBase, public Application , public EventHandle{
         using supper = DuiLib::WindowImplBase;
     public:
         MainFrame();
@@ -23,7 +24,7 @@ namespace XSPlayer {
         void Notify(DuiLib::TNotifyUI& msg) override;
         DuiLib::CControlUI* CreateControl(LPCTSTR pstrClass) override;
 
-        void OnNotify(Event event, Media* pMedia) override;
+        bool OnNotify(const EventPtr& pEvent) override;
 
         void Init(void) override;
         UINT GetClassStyle() const override;

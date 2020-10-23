@@ -24,4 +24,5 @@ namespace XSPlayer {
     const TCHAR* const kOnlineList = _T("online_list");
 
     const TCHAR* const kOfflineSource = _T("localMediaSource");
+    const TCHAR* const kLrcPannel = _T("LrcPannel");;
 }

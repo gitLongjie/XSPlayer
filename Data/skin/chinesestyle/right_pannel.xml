@@ -16,7 +16,10 @@
                 </HorizontalLayout>
                 <HorizontalLayout>
                     <Control />
-                    <Button name="btnMediaPlay" maxwidth="50" maxheight="50" normalimage="file='Data/skin/image/play.png'" hotimage="file='Data/skin/image/play.png'" pushedimage="file='Data/skin/image/play.png'"/>
+                    <Button float="true" pos="170, 0, 210, 40" name="btnMediaLast" maxwidth="40" maxheight="40" normalimage="file='Data/skin/image/control_button/play_last.png'" hotimage="file='Data/skin/image/control_button/play_last_hot.png'" pushedimage="file='Data/skin/image/control_button/play_last_hot.png'"/>
+                    <Button float="true" pos="220, 0, 260, 40" name="btnMediaPlay" maxwidth="40" maxheight="40" />
+                    <Button float="true" pos="270, 0, 310, 40" name="btnMediaNext" maxwidth="40" maxheight="40" normalimage="file='Data/skin/image/control_button/play_next.png'" hotimage="file='Data/skin/image/control_button/play_next_hot.png'" pushedimage="file='Data/skin/image/control_button/play_next_hot.png'"/>
+                    <Button float="true" pos="320, 0, 360, 40" name="btnMediaStop" maxwidth="40" maxheight="40" normalimage="file='Data/skin/image/control_button/play_stop.png'" hotimage="file='Data/skin/image/control_button/play_stop_hot.png'" pushedimage="file='Data/skin/image/control_button/play_stop_hot.png'"/>
                     <Control />
                 </HorizontalLayout>
             </VerticalLayout>

@@ -50,7 +50,7 @@ namespace XSPlayer {
 
         String name = pMedia->GetText();
         m_pMediaHandleChane->NextHandleRequest(&playControl);
-        NotifyEvent(EnventNotify::Event::MM_PLAY, pMedia);
+        NotifyEvent(ControlEvent::Create(pMedia, ControlEvent::EControl::EC_PLAY));
 
 //        m_sqliteHelper.UpdateCurrentMedia(path);
         return true;
@@ -203,14 +203,27 @@ namespace XSPlayer {
     }
 
 
-    bool MediaManager::RegistEvent(EnventNotify* pEvent) {
+    bool MediaManager::RegistEvent(EventHandle* pEvent) {
         m_listEvent.insert(pEvent);
         return true;
     }
 
 
-    bool MediaManager::UnregistEvent(EnventNotify* pEvent) {
+    bool MediaManager::UnregistEvent(EventHandle* pEvent) {
         m_listEvent.erase(pEvent);
+        return true;
+    }
+
+    bool MediaManager::NotifyEvent(const EventPtr& pEvent) {
+        if (nullptr == pEvent || 0 == pEvent->GetID()) {
+            return false;
+        }
+
+        for (auto& item : m_listEvent) {
+            if (item->OnNotify(pEvent)) {
+                return true;
+            }
+        }
         return true;
     }
 
@@ -243,12 +256,6 @@ namespace XSPlayer {
 
     void MediaManager::Init(void) {
         m_pRoot = new MediaContainer("root");
-    }
-
-    void MediaManager::NotifyEvent(EnventNotify::Event event, Media* pMedia) {
-        for (auto& item : m_listEvent) {
-            item->OnNotify(event, pMedia);
-        }
     }
 
 }
