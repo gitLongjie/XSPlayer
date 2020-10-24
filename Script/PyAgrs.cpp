@@ -75,4 +75,11 @@ namespace XSPlayer {
         return m_pAgrsImpl->Set(index, szArgs);
     }
 
+    void PyAgrs::Destroy(void) {
+        if (nullptr != m_pAgrsImpl) {
+            delete m_pAgrsImpl;
+            m_pAgrsImpl = nullptr;
+        }
+    }
+
 }

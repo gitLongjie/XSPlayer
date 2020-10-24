@@ -11,6 +11,33 @@
 
 namespace XSPlayer {
 
+    class PyThreadContext {
+    public:
+        PyThreadContext() {
+            m_bHold = PyGILState_Check();   //检测当前线程是否拥有GIL
+            if (!m_bHold) {
+                m_gstate = PyGILState_Ensure();   //如果没有GIL，则申请获取GIL
+            }
+
+            m_save = PyEval_SaveThread();
+            PyEval_RestoreThread(m_save);
+        }
+
+        ~PyThreadContext() {
+            m_save = PyEval_SaveThread();
+            PyEval_RestoreThread(m_save);
+            if (!m_bHold) {
+                PyGILState_Release(m_gstate);    //释放当前线程的GIL
+            }
+        }
+
+    private:
+        bool m_bHold = false;
+        PyGILState_STATE m_gstate;
+
+        PyThreadState* m_save = nullptr;
+    };
+
     template<> PyEnvironment* Singleton<PyEnvironment>::m_pSingleton = nullptr;
 
     PyEnvironment::PyEnvironment() {
@@ -82,6 +109,18 @@ namespace XSPlayer {
 #endif // !DEBUG
     }
 
+    PyThreadContext* PyEnvironment::Create() {
+        return new PyThreadContext();
+    }
+
+    void PyEnvironment::ReleaseThreadContext(PyThreadContext* pContext) {
+        if (nullptr == pContext) {
+            return;
+        }
+
+        delete pContext;
+    }
+
     void PyEnvironment::Init(void) {
         // return;
         Py_Initialize();
@@ -89,6 +128,13 @@ namespace XSPlayer {
         if (!m_bInitSuccess) {
             return;
         }
+
+        PyEval_InitThreads();     //开启多线程支持
+        int nInit = PyEval_ThreadsInitialized();  //检测线程支持是否开启成功
+        if (nInit) {
+            PyEval_SaveThread();  //因为调用PyEval_InitThreads成功后，当前线程就拥有了GIL，释放当前线程的GIL，
+        }
+
 // 
 //         String strPath = Utils::GetAppPath() + "\\Python";
 //         AddSysPath(strPath);

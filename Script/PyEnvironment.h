@@ -4,8 +4,11 @@
 #include <memory>
 #include "Core/Constant.h"
 #include "Core/Singleton.h"
+#include "Core/Task.h"
 
 namespace XSPlayer {
+
+    class PyThreadContext;
 
     class PyEnvironment : public Singleton<PyEnvironment> {
     public:
@@ -17,6 +20,10 @@ namespace XSPlayer {
         static int RunSampleString(const char* sampleString, int* flag = nullptr);
         static void TracebackError(void);
         static void PySalfRelease(void* pPyObject);
+
+        static PyThreadContext* Create();
+        static void ReleaseThreadContext(PyThreadContext* pContext);
+        
 
     private:
         void Init(void);

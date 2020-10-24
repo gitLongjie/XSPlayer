@@ -3,12 +3,14 @@
 #include "Core/Constant.h"
 #include "Core/MediaSource.h"
 #include "Core/MediaItem.h"
+#include "Core/Event.h"
 
 
 namespace XSPlayer {
     class PyModule;
+    class PyThreadContext;
 
-    class MediaSource9Ku : public MediaSource {
+    class MediaSource9Ku : public MediaSource, public EventHandle {
         NON_COPY_ABLE(MediaSource9Ku)
     public:
         MediaSource9Ku();
@@ -17,38 +19,35 @@ namespace XSPlayer {
     public:
         bool Load(MediaSourceCallback* pCallback) override;
         MediaContainer* GetMediaContainer(void) const override;
+        bool OnNotify(const EventPtr& pEvent) override;
 
     public:
-        bool BuilderMediaContents(MediaContainer* pMediaContainer,
-                                  MediaSourceCallback* pCallback,
-                                  MediaSourceWPtr pWMediaSource);
         bool BuilderMediaByType(MediaContainer* pMediaContainer,
                                 MediaSourceCallback* pCallback,
-                                MediaSourceWPtr pWMediaSource);
+                                PyModule* pPyModule);
         void Test();
 
     protected:
         bool ParseMediaContents(const String& content,
                                 MediaContainer* pMediaContainer,
-                                MediaSourceCallback* pCallback,
-                                MediaSourceWPtr pWMediaSource);
+                                MediaSourceCallback* pCallback);
         bool ParseMediaItems(const String& content,
                              MediaContainer* pMediaContainer,
-                             MediaSourceCallback* pCallback,
-                             MediaSourceWPtr pWMediaSource);
+                             MediaSourceCallback* pCallback);
         bool ParseMedia(const String& content, MediaContainer* pMediaContainer,
                              MediaSourceCallback* pCallback);
 
     private:
         void OnLoad(MediaSourceCallback* pCallback, MediaSourceWPtr pWMediaSource);
-        void OnLoadMedia(const String url,
+        void OnLoadMedia(const int songID,
                          MediaContainer* pMediaContainer,
                          MediaSourceCallback* pCallback,
                          MediaSourceWPtr pWMediaSource);
+        void OnLoadLrcContent(const String mediaPath);
 
     private:
-        PyModule* m_pPyModule;
         std::thread::id m_threadId;
+        std::thread::id m_loadSongThreadId;
         MediaContainer* m_pMediaContainer = nullptr;
         size_t m_count = 0;
     };

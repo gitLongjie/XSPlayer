@@ -39,7 +39,7 @@ namespace XSPlayer {
             m_pRightPannel->InitWindow();
         }
 
-        AddTrayIcon();
+ //       AddTrayIcon();
         OnInitMediaManager();
     }
 
@@ -152,11 +152,11 @@ namespace XSPlayer {
         if (ControlEvent::EControl::EC_PLAY == pControlEvent->GetEC()) {
             Media* pMedia = pControlEvent->GetMedia();
             if (nullptr == pMedia) {
-                return false;
+                return true;
             }
 
             PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
-            return true;
+            return false;
         }
         
 

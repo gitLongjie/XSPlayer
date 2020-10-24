@@ -16,7 +16,7 @@ namespace XSPlayer {
         bool Add(int nArgs);
 
         bool Set(size_t index, const char* szArgs);
-
+        void Destroy(void);
     private:
         PyAgrsImpl* m_pAgrsImpl;
     };

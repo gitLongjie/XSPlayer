@@ -13,15 +13,12 @@
 namespace XSPlayer {
 
     MediaSource9Ku::MediaSource9Ku() 
-        : m_pPyModule(new PyModule("Python.9KuMusic"))
-        , m_pMediaContainer(new MediaContainer("serverMediaSource")) {
-
+        : m_pMediaContainer(new MediaContainer("serverMediaSource")) {
+        MediaManager::GetSingleton().RegistEvent(this);
     }
 
     MediaSource9Ku::~MediaSource9Ku() {
-        if (nullptr != m_pPyModule) {
-            delete m_pPyModule;
-        }
+        MediaManager::GetSingleton().UnregistEvent(this);
     }
 
     bool MediaSource9Ku::Load(MediaSourceCallback* pCallback) {
@@ -34,48 +31,41 @@ namespace XSPlayer {
         return m_pMediaContainer;
     }
 
-    bool MediaSource9Ku::BuilderMediaContents(MediaContainer* pMediaContainer,
-                                              MediaSourceCallback* pCallback,
-                                              MediaSourceWPtr pWMediaSource) {
-        if (nullptr == m_pPyModule || nullptr == pMediaContainer) {
+
+    bool MediaSource9Ku::OnNotify(const EventPtr& pEvent) {
+        auto pControlEvent = std::dynamic_pointer_cast<ControlEvent>(pEvent);
+        if (nullptr == pControlEvent) {
             return false;
         }
 
-        String strContent;
-        {
-            MediaSourcePtr pThis = pWMediaSource.lock();
-            if (!m_pPyModule->CallFunction(strContent, "getMusicContent")) {
+        if (ControlEvent::EControl::EC_PLAY == pControlEvent->GetEC()) {
+            Media* pMedia = pControlEvent->GetMedia();
+            if (nullptr == pMedia) {
                 return false;
             }
+
+            TaskPtr pTask = CreateTask(std::bind(&MediaSource9Ku::OnLoadLrcContent, this, pMedia->GetMediaPath()));
+            ThreadPool::PushTask(pTask, ThreadPool::InvalidThreadId());
+            return false;
         }
-
-        return ParseMediaContents(strContent, pMediaContainer, pCallback, pWMediaSource);
     }
-
 
     bool MediaSource9Ku::BuilderMediaByType(MediaContainer* pMediaContainer,
                                             MediaSourceCallback* pCallback,
-                                            MediaSourceWPtr pWMediaSource) {
-        if (nullptr == m_pPyModule || nullptr == pMediaContainer) {
+                                            PyModule* pPyModule) {
+        if (nullptr == pPyModule || nullptr == pMediaContainer) {
             return false;
         }
 
         PyAgrs args(1);
         args.Add(pMediaContainer->GetMediaPath().c_str());
         String strContent;
-        {
-            MediaSourcePtr pThis = pWMediaSource.lock();
-            if (nullptr == pThis) {
-                return false;
-            }
 
-            if (!m_pPyModule->CallFunction(strContent, "getMusicList", args)) {
-                return false;
-            }
+        if (!pPyModule->CallFunction(strContent, "getMusicList", args)) {
+            return false;
         }
-        
-
-        return ParseMediaItems(strContent, pMediaContainer, pCallback, pWMediaSource);
+       
+        return ParseMediaItems(strContent, pMediaContainer, pCallback);
     }
 
     void MediaSource9Ku::Test() {
@@ -84,18 +74,16 @@ namespace XSPlayer {
         args.Add("music/t_new.htm");
         args.Add(2);
         args.Add("sss");
-
-        if (!m_pPyModule->CallFunction(strContent, "testArgs", args)) {
-            return ;
-        }
+// 
+//         if (!m_pPyModule->CallFunction(strContent, "testArgs", args)) {
+//             return ;
+//         }
     }
 
     bool MediaSource9Ku::ParseMediaContents(const String& content,
                                             MediaContainer* pMediaContainer,
-                                            MediaSourceCallback* pCallback,
-                                            MediaSourceWPtr pWMediaSource) {
-        MediaSourcePtr pThis = pWMediaSource.lock();
-        if (nullptr == pMediaContainer || nullptr == pThis) {
+                                            MediaSourceCallback* pCallback) {
+        if (nullptr == pMediaContainer) {
             return false;
         }
         rapidjson::Document doc;
@@ -131,10 +119,8 @@ namespace XSPlayer {
 
     bool MediaSource9Ku::ParseMediaItems(const String& content,
                                          MediaContainer* pMediaContainer,
-                                         MediaSourceCallback* pCallback,
-                                         MediaSourceWPtr pWMediaSource) {
-        MediaSourcePtr pThis = pWMediaSource.lock();
-        if (nullptr == pMediaContainer || nullptr == pThis) {
+                                         MediaSourceCallback* pCallback) {
+        if (nullptr == pMediaContainer) {
             return false;
         }
 
@@ -152,12 +138,12 @@ namespace XSPlayer {
         size_t count = doc.Size();
         for (size_t index = 0; index < count; ++index) {
             const rapidjson::Value& item = doc[index];
-            if (item.IsString()) {
-                std::string url = item.GetString();
+            if (item.IsInt()) {
+                int mediaID = item.GetInt();
                 TaskPtr pTask = CreateTask(std::bind(&MediaSource9Ku::OnLoadMedia, this,
-                                                     url, pMediaContainer, pCallback,
-                                                     shared_from_this()));
-                m_threadId = ThreadPool::PushTask(pTask, m_threadId);
+                                           mediaID, pMediaContainer, pCallback,
+                                           shared_from_this()));
+                ThreadPool::PushTask(pTask, ThreadPool::InvalidThreadId());
             }
         }
 
@@ -200,7 +186,18 @@ namespace XSPlayer {
             return;
         }
 
-        if (!BuilderMediaContents(m_pMediaContainer, pCallback, pWMediaSource)) {
+        PyThreadContext* pyThreadContext = PyEnvironment::Create();
+
+        PyModule pPyModule("Python.9KuMusic");
+
+        String strContent;
+        if (!pPyModule.CallFunction(strContent, "getMusicContent")) {
+            PyEnvironment::ReleaseThreadContext(pyThreadContext);
+            return;
+        }
+
+        if (!ParseMediaContents(strContent, m_pMediaContainer, pCallback)) {
+            PyEnvironment::ReleaseThreadContext(pyThreadContext);
             return;
         }
 
@@ -211,27 +208,50 @@ namespace XSPlayer {
                 continue;
             }
 
-            BuilderMediaByType(pMediaContent, pCallback, pWMediaSource);
+            BuilderMediaByType(pMediaContent, pCallback, &pPyModule);
         }
+        PyEnvironment::ReleaseThreadContext(pyThreadContext);
     }
 
-    void MediaSource9Ku::OnLoadMedia(const String url,
+    void MediaSource9Ku::OnLoadMedia(const int songID,
                                      MediaContainer* pMediaContainer,
                                      MediaSourceCallback* pCallback,
                                      MediaSourceWPtr pWMediaSource) {
+        
         MediaSourcePtr pThis = pWMediaSource.lock();
         if (nullptr == pThis) {
             return;
         }
 
+        PyThreadContext* pContext = PyEnvironment::Create();
+        std::shared_ptr<PyModule> pLoadMedia = std::make_shared<PyModule>("Python.9KuSong");
         PyAgrs args(1);
-        args.Add(url.c_str());
+        args.Add(songID);
         String strContent;
-        if (!m_pPyModule->CallFunction(strContent, "getMusic", args)) {
+        if (!pLoadMedia->CallFunction(strContent, "getMusicInfo", args)) {
+            PyEnvironment::ReleaseThreadContext(pContext);
             return;
         }
 
+        args.Destroy();
         ParseMedia(strContent, pMediaContainer, pCallback);
+        PyEnvironment::ReleaseThreadContext(pContext);
+    }
+
+    void MediaSource9Ku::OnLoadLrcContent(const String mediaPath) {
+        PyThreadContext* pContext = PyEnvironment::Create();
+        std::shared_ptr<PyModule> pLoadMedia = std::make_shared<PyModule>("Python.9KuSongLrc");
+        PyAgrs args(1);
+        args.Add(mediaPath.c_str());
+        String strContent;
+        if (!pLoadMedia->CallFunction(strContent, "getMusicLrc", args)) {
+            PyEnvironment::ReleaseThreadContext(pContext);
+            return;
+        }
+        args.Destroy();
+
+        std::string strLrc = Utils::UnicodeToGBK(strContent);
+        PyEnvironment::ReleaseThreadContext(pContext);
     }
 
     MediaSourcePtr MediaSource9KuFactory::Create(void) {
