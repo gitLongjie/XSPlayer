@@ -6,6 +6,7 @@
 #include "Request/PlayControlRequest.h"
 #include "Core/FFMpegContextRequest.h"
 #include "Core/MediaManager.h"
+#include "Render/RenderEvent.h"
 
 namespace XSPlayer {
 
@@ -98,8 +99,8 @@ namespace XSPlayer {
 
 
     void AudioRenderChain::UpdateRenderPostion(size_t len) {
-        MediaInfo mediaInfo = { 2, len };
-        MediaManager::GetSingleton().UpdateMediaInfo(mediaInfo);
+        EventPtr pEvnet = RenderEvent::Create(RenderEvent::Type::RENDER_POS, len);
+        MediaManager::GetSingleton().NotifyEvent(pEvnet);
     }
 
     bool AudioRenderChain::SeekPlay(PlaySeekRequest* request) {

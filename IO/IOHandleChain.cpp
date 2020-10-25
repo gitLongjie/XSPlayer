@@ -8,6 +8,7 @@
 #include "Core/FFMpegContextRequest.h"
 #include "Request/PlaySeekRequest.h"
 #include "Core/MediaManager.h"
+#include "Render/RenderEvent.h"
 
 namespace XSPlayer {
 
@@ -103,8 +104,8 @@ namespace XSPlayer {
         FFMpegContextRequest request(pContext, true);
         NextHandleRequest(&request);
 
-        MediaInfo info = { 1, pContext->GetDuration() };
-        MediaManager::GetSingleton().UpdateMediaInfo(info);
+        EventPtr pEvnet = RenderEvent::Create(RenderEvent::Type::INIT, pContext->GetDuration());
+        MediaManager::GetSingleton().NotifyEvent(pEvnet);
         m_bPauseRead = false;
         m_bEof = false;
 

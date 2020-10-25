@@ -7,6 +7,10 @@
 
 namespace XSPlayer {
 
+constexpr int EVENT_CONTROL = 1;
+constexpr int EVENT_LRC = 2;
+constexpr int EVENT_RENDER = 3;
+
     class Media;
 
     class Event : public std::enable_shared_from_this<Event> {

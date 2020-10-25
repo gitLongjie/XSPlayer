@@ -8,6 +8,7 @@
 #include "Script/PyEnvironment.h"
 #include "Script/PyModule.h"
 #include "Script/PyAgrs.h"
+#include "Script/LrcEvent.h"
 #include "Utils.h"
 
 namespace XSPlayer {
@@ -48,6 +49,7 @@ namespace XSPlayer {
             ThreadPool::PushTask(pTask, ThreadPool::InvalidThreadId());
             return false;
         }
+        return true;
     }
 
     bool MediaSource9Ku::BuilderMediaByType(MediaContainer* pMediaContainer,
@@ -251,6 +253,7 @@ namespace XSPlayer {
         args.Destroy();
 
         std::string strLrc = Utils::UnicodeToGBK(strContent);
+        MediaManager::GetSingleton().NotifyEvent(LrcEvent::Create(strLrc));
         PyEnvironment::ReleaseThreadContext(pContext);
     }
 

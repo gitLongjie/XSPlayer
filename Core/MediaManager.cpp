@@ -183,19 +183,6 @@ namespace XSPlayer {
 //         });
     }
 
-    void MediaManager::UpdateMediaInfo(const MediaInfo& infor) {
-        if (nullptr == m_callback) {
-            return;
-        }
-
-        m_callback(infor);
-    }
-
-    void MediaManager::SetInfoCallback(InforCallback callback) {
-        m_callback = callback;
-    }
-
-
     size_t MediaManager::GenerateMeidaId(void) {
         size_t medaiId = m_meidaCount.load();
          ++m_meidaCount;
@@ -207,7 +194,6 @@ namespace XSPlayer {
         m_listEvent.insert(pEvent);
         return true;
     }
-
 
     bool MediaManager::UnregistEvent(EventHandle* pEvent) {
         m_listEvent.erase(pEvent);

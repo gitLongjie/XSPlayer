@@ -6,12 +6,6 @@ import json
 from bs4 import BeautifulSoup
 
 
-def getMusicLrcContent(html):
-    soup = BeautifulSoup(html, "html5lib")
-    lrc_content = soup.find('textarea', id='lrc_content')
-    return lrc_content.text.replace('\n', ' ')
-
-
 def getMusicId(url):
     pos = url.find('.htm')
     if pos > 0:
@@ -21,27 +15,13 @@ def getMusicId(url):
     return 0
 
 
-def getMusicInfo(music_id):
-    path = math.floor(music_id / 1000) + 1
-    url = 'http://www.9ku.com/html/playjs/{0}/{1}.js'.format(path, music_id)
-    req = requests.get(url)
-    if 200 != req.status_code:
-        return False
-    content = req.content.decode()
-    song_josn = json.loads(content[1:-1])
-    print(song_josn)
-    data = {'name': song_josn['mname'], 'singer': song_josn['singer'], 'url': song_josn['wma'], 'id': song_josn['id']}
-    return data
-
-
 def getMusicUrl(song, list_song_jsons):
     list_song_as = song.find_all('a', class_='songName')
-#    list_song_jsons = []
     for song_a in list_song_as:
-        music_id = getMusicId(song_a.attrs['href'])
-        data = getMusicInfo(music_id)
-        if data is not False:
-            list_song_jsons.append(data)
+        url = getMusicId(song_a.attrs['href'])
+        print(url)
+        list_song_jsons.append(url)
+
 #    return list_song_jsons
 
 
@@ -57,7 +37,6 @@ def getMusicList(url):
     list_song_jsons = []
     for sond_block in list_sond_blocks:
         getMusicUrl(sond_block, list_song_jsons)
-        break;
     return json.dumps(list_song_jsons)
 
 
@@ -88,9 +67,9 @@ def testArgs(s1, s2, s3):
     return "success"
 
 
+
 def main():
     list_type = getMusicList('music/t_new.htm')
-    print(list_type)
     return json.dumps(list_type)
     i = 0
     count = len(list_type)

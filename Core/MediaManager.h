@@ -53,9 +53,6 @@ namespace XSPlayer {
 
         void SortLocalMediaByNumberName(void);
 
-        void UpdateMediaInfo(const MediaInfo& infor);
-        void SetInfoCallback(InforCallback callback);
-
         static size_t GenerateMeidaId(void);
 
         bool RegistEvent(EventHandle* pEvent);

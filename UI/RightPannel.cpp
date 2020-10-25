@@ -4,6 +4,7 @@
 
 #include "Core/MediaManager.h"
 #include "UI/BuildCallback.h"
+#include "UI/LrcPannel.h"
 
 namespace XSPlayer {
 
@@ -66,6 +67,17 @@ namespace XSPlayer {
             OnBtnPlay();
         }
         break;
+
+        case WM_MEDIA_LRC_LOADED:
+        {
+            char* szLrc =reinterpret_cast<char*>(lParam);
+            String lrc(szLrc);
+            delete[] szLrc;
+
+            OnDisplayLrc(lrc);
+        }
+        break;
+
         default:
             break;
         }
@@ -75,7 +87,7 @@ namespace XSPlayer {
 
     void RightPannel::Init(void) {
         DuiLib::CDialogBuilder dailogBuilder;
-        BuildCallback callback(nullptr);;
+        BuildCallback callback(nullptr);
         DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/right_pannel.xml"), (UINT)0, &callback));
         if (nullptr != pContainerUI) {
             Add(pContainerUI);
@@ -241,9 +253,10 @@ namespace XSPlayer {
         m_nCurrentDuration = nDuration;
         UpdateTimeText();
 
+        OnUpdateLrc(nDuration);
+
         if (m_nCurrentDuration >= m_nDuration) {
             OnBtnNext();
-            // PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_NEXT, 0, 0);
         }
     }
 
@@ -283,6 +296,8 @@ namespace XSPlayer {
         m_pLabelPlayTime = dynamic_cast<DuiLib::CLabelUI*>(m_pManager->FindControl(_T("player_time")));
         m_pLabelTotoleTime =  dynamic_cast<DuiLib::CLabelUI*>(m_pManager->FindControl(_T("player_totol_time")));
         m_pBtnPlay = dynamic_cast<DuiLib::CButtonUI*>(m_pManager->FindControl(_T("btnMediaPlay")));
+
+        m_pLrcPannel = dynamic_cast<LrcPannel*>(m_pManager->FindControl(_T("lrcPannel")));
 
 //        m_pLabelPlayTime->SetText(_T("00:00:00"));
 //        m_pLabelTotoleTime->SetText(_T("00:00:00"));
@@ -325,6 +340,22 @@ namespace XSPlayer {
             m_pBtnPlay->SetHotImage(_T("file='Data/skin/image/control_button/play_hot.png'"));
             m_pBtnPlay->SetPushedImage(_T("file='Data/skin/image/control_button/play_hot.png'"));
         }
+    }
+
+    void RightPannel::OnDisplayLrc(const String& lrc) {
+        if (nullptr == m_pLrcPannel) {
+            return;
+        }
+
+        m_pLrcPannel->UpdateContent(lrc);
+    }
+
+    void RightPannel::OnUpdateLrc(size_t len) {
+        if (nullptr == m_pLrcPannel) {
+            return;
+        }
+
+        m_pLrcPannel->UpdateLrc(len);
     }
 
 }

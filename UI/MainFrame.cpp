@@ -10,6 +10,8 @@
 #include "IO/IOHandleChain.h"
 #include "IO/SqliteHelper.h"
 #include "Script/MediaSource9Ku.h"
+#include "Script/LrcEvent.h"
+#include "Render/RenderEvent.h"
 #include "Utils.h"
 
 #include "resource.h"
@@ -144,18 +146,19 @@ namespace XSPlayer {
     }
 
     bool MainFrame::OnNotify(const EventPtr& pEvent) {
-        auto pControlEvent = std::dynamic_pointer_cast<ControlEvent>(pEvent);
-        if (nullptr == pControlEvent) {
+        if (EVENT_CONTROL == pEvent->GetID()) {
+            auto pControlEvent = std::dynamic_pointer_cast<ControlEvent>(pEvent);
+            OnControlEvent(pControlEvent.get());
             return false;
         }
-
-        if (ControlEvent::EControl::EC_PLAY == pControlEvent->GetEC()) {
-            Media* pMedia = pControlEvent->GetMedia();
-            if (nullptr == pMedia) {
-                return true;
-            }
-
-            PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
+        else if (EVENT_LRC == pEvent->GetID()) {
+            auto pLrcEvent = std::dynamic_pointer_cast<LrcEvent>(pEvent);
+            OnLrcEvent(pLrcEvent.get());
+            return false;
+        }
+        else if (EVENT_RENDER == pEvent->GetID()) {
+            auto pRenderEvent = std::dynamic_pointer_cast<RenderEvent>(pEvent);
+            OnRenderEvent(pRenderEvent.get());
             return false;
         }
         
@@ -170,15 +173,6 @@ namespace XSPlayer {
         IOHandleChainPtr pIOHandle = std::make_shared<IOHandleChain>(pDecodeHandle, ThreadType::TT_IO);
         pDecodeHandle->SetLastChain(pIOHandle);
         MediaManager::GetSingleton().AddHandleChain(pIOHandle);
-
-        MediaManager::GetSingleton().SetInfoCallback([this](const MediaInfo& info) {
-            if (1 == info.nType) {
-                PostMessage(WM_RIGHTPANNEL_INIT_DURATION, info.nDuration, 0);
-            }
-            else if (2 == info.nType) {
-                PostMessage(WM_RIGHTPANNEL_UPDATE_DURATION, info.nDuration, 0);
-            }
-        });
     }
 
     UINT MainFrame::GetClassStyle() const {
@@ -276,6 +270,51 @@ namespace XSPlayer {
         MediaManager::GetSingleton().AddMediaSource(&sqlitFactory, m_pOfflineUITab);
         MediaSource9KuFactory kuFactory;
         MediaManager::GetSingleton().AddMediaSource(&kuFactory, m_pOnlineUITab);
+    }
+
+    bool MainFrame::OnControlEvent(const ControlEvent* pEvent) {
+        if (nullptr == pEvent) {
+            return false;
+        }
+
+        if (ControlEvent::EControl::EC_PLAY == pEvent->GetEC()) {
+            Media* pMedia = pEvent->GetMedia();
+            if (nullptr == pMedia) {
+                return false;
+            }
+
+            PostMessage(WM_CHANGE_CUR_PLAY, 0, pMedia->GetMediaId());
+            return true;
+        }
+        return false;
+    }
+
+    bool MainFrame::OnLrcEvent(const LrcEvent* pEvent) {
+        if (nullptr == pEvent) {
+            return false;
+        }
+
+        const String& lrc = pEvent->GetContent();
+        char* szLrc = new char[lrc.length() + 1];
+        memset(szLrc, 0, lrc.length() + 1);
+        memcpy(szLrc, lrc.c_str(), lrc.length() + 1);
+        PostMessage(WM_MEDIA_LRC_LOADED, 0, (LPARAM)szLrc);
+        return true;
+    }
+
+    bool MainFrame::OnRenderEvent(const RenderEvent* pEvent) {
+        if (nullptr == pEvent) {
+            return false;
+        }
+
+        if (RenderEvent::Type::INIT == pEvent->GetContent()) {
+            PostMessage(WM_RIGHTPANNEL_INIT_DURATION, pEvent->GetLength(), 0);
+        }
+        else if (RenderEvent::Type::RENDER_POS == pEvent->GetContent()) {
+            PostMessage(WM_RIGHTPANNEL_UPDATE_DURATION, pEvent->GetLength(), 0);
+        }
+        
+        return true;
     }
 
 }

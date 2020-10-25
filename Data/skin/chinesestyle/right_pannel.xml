@@ -2,6 +2,7 @@
 <Window>
     <VerticalLayout>
         <HorizontalLayout inset="3,0,3,3" bkcolor="#20FFFFFF">
+            <LrcPannel />
         </HorizontalLayout>
         <HorizontalLayout height="70">
             <VerticalLayout>

@@ -11,6 +11,8 @@ namespace XSPlayer {
     class OfflineUITab;
     class OnlineUITab;
     class RightPannel;
+    class LrcEvent;
+    class RenderEvent;
 
     class MainFrame : public DuiLib::WindowImplBase, public Application , public EventHandle{
         using supper = DuiLib::WindowImplBase;
@@ -43,6 +45,11 @@ namespace XSPlayer {
         void AddTrayIcon();
         LRESULT OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
         void OnInitMediaManager(void);
+
+    private:
+        bool OnControlEvent(const ControlEvent* pEvent);
+        bool OnLrcEvent(const LrcEvent* pEvent);
+        bool OnRenderEvent(const RenderEvent* pEvent);
 
     private:
         OfflineUITab* m_pOfflineUITab = nullptr;

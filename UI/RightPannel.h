@@ -7,6 +7,8 @@
 
 namespace XSPlayer {
 
+    class LrcPannel;
+
     class RightPannel : public DuiLib::CContainerUI
         , public DuiLib::INotifyUI {
         using supper = DuiLib::CContainerUI;
@@ -43,6 +45,9 @@ namespace XSPlayer {
 
     private:
         void ChangePlayImage(bool bPlay);
+        void OnDisplayLrc(const String& lrc);
+        void OnUpdateLrc(size_t len);
+
     private:
         enum class PlayStatus {
             PS_Stop,
@@ -60,5 +65,7 @@ namespace XSPlayer {
         MediaSourceType m_mediaSoruce = MediaSourceType::MST_LOCAL;
         std::chrono::high_resolution_clock::time_point m_lastPlayTime;
         bool m_bSeek = false;
+
+        LrcPannel* m_pLrcPannel = nullptr;
     };
 }
