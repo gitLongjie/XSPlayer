@@ -24,6 +24,10 @@ namespace XSPlayer {
     }
 
 
+    void MediaManager::Destory(void) {
+        m_listMediaSoruces.clear();
+    }
+
     void MediaManager::SetPlayMedia(size_t meidaID) {
         m_currentPlayMedia = meidaID;
     }

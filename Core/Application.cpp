@@ -10,7 +10,10 @@ Application::Application(void)
 }
 
  Application::~Application(void) {
+     m_pMediaManager->Destory();
      m_pThreadPool->UnregistTaskQueue(m_pAppHandleTaskQueue);
+     m_pThreadPool.reset();
+     m_pMediaManager.reset();
 }
 
 void Application::OnRunTask(void) { m_pAppHandleTaskQueue->OnRun(); }

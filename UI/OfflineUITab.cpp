@@ -107,7 +107,8 @@ namespace XSPlayer {
 
         case WM_CHANGE_LAST_PLAY:
         {
-            LastMedia();
+            MediaSourceType* sourceType = reinterpret_cast<MediaSourceType*>(lParam);
+            LastMedia(*sourceType);
         }break;
 
         case WM_CHANGE_STOP_PLAY:
@@ -299,7 +300,11 @@ namespace XSPlayer {
         MediaManager::GetSingleton().SortLocalMediaByNumberName();
     }
 
-    void OfflineUITab::LastMedia() {
+    void OfflineUITab::LastMedia(const MediaSourceType sourceType) {
+        if (sourceType != MediaSourceType::MST_LOCAL) {
+            return;
+        }
+
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOfflineList));
         if (nullptr == pList) {
             return;

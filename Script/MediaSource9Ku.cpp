@@ -231,6 +231,7 @@ namespace XSPlayer {
         args.Add(songID);
         String strContent;
         if (!pLoadMedia->CallFunction(strContent, "getMusicInfo", args)) {
+            args.Destroy();
             PyEnvironment::ReleaseThreadContext(pContext);
             return;
         }
@@ -247,6 +248,7 @@ namespace XSPlayer {
         args.Add(mediaPath.c_str());
         String strContent;
         if (!pLoadMedia->CallFunction(strContent, "getMusicLrc", args)) {
+            args.Destroy();
             PyEnvironment::ReleaseThreadContext(pContext);
             return;
         }

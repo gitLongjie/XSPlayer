@@ -31,22 +31,22 @@ namespace XSPlayer {
     private:
         void Init(DuiLib::CPaintManagerUI* pPaintManagerUI);
 
-        bool PushToList(const std::vector<String>&& filePath);
         void OnAddListItem(UINT uMsg, WPARAM wParam, LPARAM lParam);
-        void NextMedia();
+        void NextMedia(const MediaSourceType sourceType);
 
         void SortByNumber();
 
-        void LastMedia();
+        void LastMedia(const MediaSourceType sourceType);
         void StopMedia();
-        void OnLoadMediaContent(MediaListItemContainer* pListItemContainer,
-                                std::shared_ptr<MediaSource9Ku> pMediaSource,
-                                MediaItem* mediaData);
 
         void OnAddItem(LPARAM args);
 
         void OnMediaItems(LPARAM lParam);
+
+        bool IsContainter(int index);
+        
     private:
         MediaList* m_pMediaList = nullptr;
+        int m_activeItem = -1;
     };
 }

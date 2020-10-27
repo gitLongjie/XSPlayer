@@ -32,6 +32,7 @@ namespace XSPlayer {
     public:
         MediaManager(void);
         ~MediaManager(void) override;
+        void Destory(void);
 
         void SetPlayMedia(size_t meidaID);
         bool PlayMedia(size_t meidaID);

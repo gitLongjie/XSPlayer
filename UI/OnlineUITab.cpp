@@ -69,7 +69,12 @@ namespace XSPlayer {
             if (nullptr == pList || pListItem->GetMediaList() != pList) {
                 return;
             }
-            int nCurSel = pList->GetCurSel();
+            const int nCurSel = pList->GetCurSel();
+            if (nCurSel == m_activeItem) {
+                return;
+            }
+
+            m_activeItem = nCurSel;
             PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_PLAY, nCurSel, 0);
         }
     }
@@ -105,8 +110,17 @@ namespace XSPlayer {
             OnMediaItems(lParam);
             break;
 
+        case WM_CHANGE_LAST_PLAY:
+        {
+            MediaSourceType* sourceType = reinterpret_cast<MediaSourceType*>(lParam);
+            LastMedia(*sourceType);
+        }break;
+
         case WM_ONLINE_NEXT:
-            NextMedia();
+        {
+            MediaSourceType* sourceType = reinterpret_cast<MediaSourceType*>(lParam);
+            NextMedia(*sourceType);
+        }
             break;
 
         default:
@@ -136,35 +150,6 @@ namespace XSPlayer {
         }
     }
 
-    bool OnlineUITab::PushToList(const std::vector<String>&& filePath) {
-        if (filePath.empty()) {
-            return false;
-        }
-
-        DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
-        if (nullptr == pList) {
-            return false;
-        }
-        auto pMediaList = dynamic_cast<MediaList*>(pList);
-        if (nullptr == pMediaList) {
-            return false;
-        }
-        
-        for (const auto& item : filePath) {
-            String name;
-//             if (MediaManager::GetSingleton().AddMedia(item)) {
-//                 name = MediaManager::GetSingleton().GetLocalMedia(MediaManager::GetSingleton().GetMediaFileCount() - 1);
-//                 auto pMediaListItem = new MediaListItem(name.c_str());
-// 
-//                 pMediaListItem->SetMediaArtist(_T("未知"));
-//                 pMediaList->Add(pMediaListItem);
-//             }
-        }
-
-        return true;
-
-    }
-
     void OnlineUITab::OnAddListItem(UINT uMsg, WPARAM wParam, LPARAM lParam)  {
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
         if (nullptr == pList) {
@@ -174,7 +159,11 @@ namespace XSPlayer {
         pList->Add(pListElement);
     }
 
-    void OnlineUITab::NextMedia() {
+    void OnlineUITab::NextMedia(const MediaSourceType sourceType) {
+        if (sourceType != MediaSourceType::MST_9KU_SERVER) {
+            return;
+        }
+
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
         if (nullptr == pList) {
             return;
@@ -187,21 +176,13 @@ namespace XSPlayer {
         }
         nCur += 1;
         pList->SelectItem(nCur);
-
-        DuiLib::CControlUI* pListElement = pList->GetItemAt(nCur);
-        if (nullptr == pListElement) {
+        nCur -= 1;
+        pList->SelectItem(nCur);
+        if (IsContainter(nCur)) {
+            NextMedia(sourceType);
             return;
         }
-
-        ListItem* pListItem = reinterpret_cast<ListItem*>(pListElement->GetTag());
-        if (nullptr == pListItem) {
-            return;
-        }
-
-        if (pListItem->HasChildren()) {
-            NextMedia();
-            return;
-        }
+ 
 
         PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_PLAY, nCur, 0);
     }
@@ -216,33 +197,31 @@ namespace XSPlayer {
         MediaManager::GetSingleton().SortLocalMediaByNumberName();
     }
 
-    void OnlineUITab::LastMedia() {
+    void OnlineUITab::LastMedia(const MediaSourceType sourceType) {
+        if (sourceType != MediaSourceType::MST_9KU_SERVER) {
+            return;
+        }
+
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
         if (nullptr == pList) {
             return;
         }
 
         int nCur = pList->GetCurSel();
-        if (nCur <= 0) {
+        if (nCur <= 1) {
             return;
         }
         nCur -= 1;
         pList->SelectItem(nCur);
+        if (IsContainter(nCur)) {
+            LastMedia(sourceType);
+            return;
+        }
+
+        PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_PLAY, nCur, 0);
     }
 
     void OnlineUITab::StopMedia() {
-    }
-
-    void OnlineUITab::OnLoadMediaContent(MediaListItemContainer* pListItemContainer,
-                                         std::shared_ptr<MediaSource9Ku> pMediaSource,
-                                         MediaItem* mediaData) {
-        if (nullptr == pListItemContainer || nullptr == pMediaSource) {
-            return;
-        }
-// 
-//         MediaDatas netMediaItems = std::move(pMediaSource->BuilderMediaByType(mediaData));
-//         auto* pArgs = new Args<MediaDatas, MediaListItemContainer*>(std::move(netMediaItems), pListItemContainer);
-//         PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_ADD_MEDIAITEM, 0, (LPARAM)pArgs);
     }
 
     void OnlineUITab::OnAddItem(LPARAM args) {
@@ -308,6 +287,30 @@ namespace XSPlayer {
             pMediaItem->SetMediaPath(item->GetMediaPath());
             pMediaListItem->Add(pMediaItem);
         }
+    }
+
+    bool OnlineUITab::IsContainter(int index) {
+        DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
+        if (nullptr == pList) {
+            return false;
+        }
+
+        int nCur = pList->GetCurSel();
+        if (nCur <= 1) {
+            return false;
+        }
+
+        DuiLib::CControlUI* pControl = pList->GetItemAt(nCur);
+        if (nullptr == pControl) {
+            return false;
+        }
+
+       ListItem* pListItem = reinterpret_cast<ListItem*>(pControl->GetTag());
+       if (nullptr == pListItem) {
+           return false;
+       }
+
+       return pListItem->HasChildren();
     }
 
 }

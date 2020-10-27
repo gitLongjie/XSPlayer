@@ -36,7 +36,7 @@ namespace XSPlayer {
 
         void SortByNumber();
 
-        void LastMedia();
+        void LastMedia(const MediaSourceType sourceType);
         void StopMedia();
     };
 }

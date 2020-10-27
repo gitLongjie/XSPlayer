@@ -282,10 +282,10 @@ namespace XSPlayer {
 
     void RightPannel::OnBtnNext() {
         if (MediaSourceType::MST_LOCAL == m_mediaSoruce) {
-            SendMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_NEXT, 0, 0);
+            SendMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_NEXT, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
         }
         else {
-            SendMessage(m_pManager->GetPaintWindow(), WM_ONLINE_NEXT, 0, 0);
+            SendMessage(m_pManager->GetPaintWindow(), WM_ONLINE_NEXT, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
         }
         
     }
@@ -306,7 +306,7 @@ namespace XSPlayer {
     }
 
     void RightPannel::OnBtnLast() {
-        SendMessage(m_pManager->GetPaintWindow(), WM_CHANGE_LAST_PLAY, 0, 0);
+        SendMessage(m_pManager->GetPaintWindow(), WM_CHANGE_LAST_PLAY, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
     }
 
     void RightPannel::OnBtnStop() {

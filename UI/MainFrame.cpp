@@ -41,7 +41,7 @@ namespace XSPlayer {
             m_pRightPannel->InitWindow();
         }
 
- //       AddTrayIcon();
+        AddTrayIcon();
         OnInitMediaManager();
     }
 
@@ -197,10 +197,12 @@ namespace XSPlayer {
     }
 
     void MainFrame::OnExit(DuiLib::TNotifyUI& msg) {
-        MediaManager::GetSingleton().Stop();
-        m_trayIcon.hIcon = NULL;
-        Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);        
-        ::PostQuitMessage(0);
+        ShowWindow(SW_HIDE);
+
+//         MediaManager::GetSingleton().Stop();
+//         m_trayIcon.hIcon = NULL;
+//         Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
+//         ::PostQuitMessage(0);
  //       ShowWindow(SW_HIDE);
     }
 

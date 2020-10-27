@@ -46,13 +46,16 @@ void ThreadPool::UnregistTaskQueue(const IThreadPoolInnerPtr& threadPoolInner) {
 
 void ThreadPool::UnregistTaskQueue(ThreadType type) {
     LOG_ENTER;
-    std::unique_lock<std::mutex> lock(m_mutex);
-    auto itor = m_listThreadPoolInner.find(type);
-    if (m_listThreadPoolInner.end() == itor) {
-        return;
+    IThreadPoolInnerPtr pThreadPool;
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        auto itor = m_listThreadPoolInner.find(type);
+        if (m_listThreadPoolInner.end() == itor) {
+            return;
+        }
+        pThreadPool = itor->second;
+        m_listThreadPoolInner.erase(itor);
     }
-
-    m_listThreadPoolInner.erase(itor);
     LOG_LIVE;
 }
 
