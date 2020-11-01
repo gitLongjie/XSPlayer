@@ -8,8 +8,7 @@
 
 namespace XSPlayer {
 
-    RightPannel::RightPannel() : supper() {
-        Init();
+    RightPannel::RightPannel() : XSControlUI() {
 
         m_lastPlayTime = std::chrono::high_resolution_clock::now();
     }
@@ -85,7 +84,7 @@ namespace XSPlayer {
         return 0;
     }
 
-    void RightPannel::Init(void) {
+    void RightPannel::DoInit(void) {
         DuiLib::CDialogBuilder dailogBuilder;
         BuildCallback callback(nullptr);
         DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/right_pannel.xml"), (UINT)0, &callback));
@@ -291,6 +290,7 @@ namespace XSPlayer {
     }
 
     void RightPannel::InitWindow(void) {
+        __super::InitWindow();
        // SetTimer(m_pManager->GetPaintWindow(), IDT_TIMER1_1SECONDE, 1000, NULL);
         m_pSliderPlayUI = static_cast<DuiLib::CSliderUI*>(m_pManager->FindControl(_T("player_slider")));
         m_pLabelPlayTime = dynamic_cast<DuiLib::CLabelUI*>(m_pManager->FindControl(_T("player_time")));

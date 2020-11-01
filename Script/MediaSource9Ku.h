@@ -17,31 +17,26 @@ namespace XSPlayer {
         ~MediaSource9Ku();
 
     public:
-        bool Load(MediaSourceCallback* pCallback) override;
+        bool Load(void) override;
         MediaContainer* GetMediaContainer(void) const override;
         bool OnNotify(const EventPtr& pEvent) override;
 
     public:
         bool BuilderMediaByType(MediaContainer* pMediaContainer,
-                                MediaSourceCallback* pCallback,
                                 PyModule* pPyModule);
         void Test();
 
     protected:
         bool ParseMediaContents(const String& content,
-                                MediaContainer* pMediaContainer,
-                                MediaSourceCallback* pCallback);
+                                MediaContainer* pMediaContainer);
         bool ParseMediaItems(const String& content,
-                             MediaContainer* pMediaContainer,
-                             MediaSourceCallback* pCallback);
-        bool ParseMedia(const String& content, MediaContainer* pMediaContainer,
-                             MediaSourceCallback* pCallback);
+                             MediaContainer* pMediaContainer);
+        bool ParseMedia(const String& content, MediaContainer* pMediaContainer);
 
     private:
-        void OnLoad(MediaSourceCallback* pCallback, MediaSourceWPtr pWMediaSource);
+        void OnLoad(MediaSourceWPtr pWMediaSource);
         void OnLoadMedia(const int songID,
                          MediaContainer* pMediaContainer,
-                         MediaSourceCallback* pCallback,
                          MediaSourceWPtr pWMediaSource);
         void OnLoadLrcContent(const String mediaPath);
 

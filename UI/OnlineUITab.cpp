@@ -19,8 +19,7 @@
 
 namespace XSPlayer {
 
-    OnlineUITab::OnlineUITab(DuiLib::CPaintManagerUI* pPaintManagerUI) : supper() {
-        Init(pPaintManagerUI);
+    OnlineUITab::OnlineUITab(void) : XSControlUI() {
     }
 
     OnlineUITab::~OnlineUITab() {
@@ -31,7 +30,7 @@ namespace XSPlayer {
         if (event.Type == DuiLib::UIEVENT_BUTTONDOWN) {
             return;
         }
-        supper::DoEvent(event);
+        __super::DoEvent(event);
     }
 
     void OnlineUITab::Notify(DuiLib::TNotifyUI& msg) {
@@ -79,27 +78,6 @@ namespace XSPlayer {
         }
     }
 
-    void OnlineUITab::OnLoadedCallback(Media* pMedia) {
-        if (nullptr == pMedia) {
-            return;
-        }
-
-        if (!pMedia->IsLeaf()) {
-            auto pMeidaListContainer = new MediaListItemContainer(pMedia->GetText());
-            pMeidaListContainer->SetMediaID(pMedia->GetMediaId());
-            pMeidaListContainer->SetMediaPath(pMedia->GetMediaPath());
-            PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_ADD_LISTITEM, 0, (LPARAM)pMeidaListContainer);
-        }
-        else {
-            auto pMediaItem = dynamic_cast<MediaItem*>(pMedia);
-            if (nullptr == pMediaItem) {
-                return;
-            }
-            PostMessage(m_pManager->GetPaintWindow(), WM_ONLINE_ADD_LISTITEM, 0, (LPARAM)pMediaItem);
-        }
-        
-    }
-
     LRESULT OnlineUITab::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         switch (uMsg) {
         case WM_ONLINE_ADD_LISTITEM:
@@ -130,6 +108,7 @@ namespace XSPlayer {
     }
 
     void OnlineUITab::InitWindow() {
+        __super::InitWindow();
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
         if (nullptr == pList) {
             return;
@@ -138,9 +117,9 @@ namespace XSPlayer {
         m_pMediaList = dynamic_cast<MediaList*>(pList);
     }
 
-    void OnlineUITab::Init(DuiLib::CPaintManagerUI* pPaintManagerUI) {
+    void OnlineUITab::DoInit(void) {
         DuiLib::CDialogBuilder dailogBuilder;
-        BuildCallback callback(pPaintManagerUI);
+        BuildCallback callback(m_pManager);
         DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/online_tab.xml"), (UINT)0, &callback));
         if (nullptr != pContainerUI) {
             Add(pContainerUI);
@@ -175,8 +154,6 @@ namespace XSPlayer {
             return;
         }
         nCur += 1;
-        pList->SelectItem(nCur);
-        nCur -= 1;
         pList->SelectItem(nCur);
         if (IsContainter(nCur)) {
             NextMedia(sourceType);

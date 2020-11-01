@@ -10,6 +10,9 @@ namespace XSPlayer {
 constexpr int EVENT_CONTROL = 1;
 constexpr int EVENT_LRC = 2;
 constexpr int EVENT_RENDER = 3;
+constexpr int EVENT_SOURCE = 4;
+constexpr int EVENT_SOURCE_TYPE = 5;
+constexpr int EVENT_UI = 6;
 
     class Media;
 
@@ -52,6 +55,34 @@ constexpr int EVENT_RENDER = 3;
     private:
         Media* m_pMedia = nullptr;
         EControl m_ec = EControl::EC_UNKNOWN;
+    };
+
+    class MediaSourceTypeCreateEvent : public Event {
+    public:
+        const String& GetText(void) const { return m_txt; }
+        const String& GetSource(void) const { return m_source; }
+        static EventPtr Create(const String& txt, const String& source);
+
+    public:
+        explicit MediaSourceTypeCreateEvent(const String& txt, const String& source);
+
+    private:
+        String m_txt;
+        String m_source;
+    };
+
+    class MediaSourceEvent : public Event {
+    public:
+        Media* GetMedia(void) const { return m_pMedia; }
+        const String& GetSource(void) const;
+        static EventPtr Create(Media* pMedia, const String& source);
+
+    public:
+        explicit MediaSourceEvent(Media* pMedia, const String& source);
+
+    private:
+        Media* m_pMedia = nullptr;
+        String m_source;
     };
 }
 

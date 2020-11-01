@@ -217,8 +217,7 @@ namespace XSPlayer {
         return true;
     }
 
-    bool MediaManager::AddMediaSource(MediaSourceFactory* pMediaSourceFactory,
-                                      MediaSourceCallback* pCallback) {
+    bool MediaManager::AddMediaSource(MediaSourceFactory* pMediaSourceFactory) {
         if (nullptr == pMediaSourceFactory) {
             return false;
         }
@@ -234,7 +233,7 @@ namespace XSPlayer {
         }
         m_listMediaSoruces[mediaSourceType] = pMediaSource;
 
-        pMediaSource->Load(pCallback);
+        pMediaSource->Load();
         
         MediaContainer* pMediaContainer = pMediaSource->GetMediaContainer();
         if (nullptr == pMediaContainer) {

@@ -7,6 +7,7 @@
 #include "Core/Media.h"
 #include "Core/MediaItem.h"
 #include "Core/MediaManager.h"
+#include "Core/Event.h"
 #include "Utils.h"
 #include "Contanst.h"
 
@@ -62,10 +63,13 @@ namespace XSPlayer {
         }
     }
 
-    bool SqliteHelper::Load(MediaSourceCallback* pCallback) {
+    bool SqliteHelper::Load() {
         if (!m_bOpen) {
             return false;
         }
+
+        MediaManager::GetSingleton().NotifyEvent(MediaSourceTypeCreateEvent::Create(
+            _T("±¾µØÃ½Ìå"), kMediaSourceLocal));
 
         const char* sql = "select media_name, media_path from media;";
 
@@ -97,9 +101,7 @@ namespace XSPlayer {
             pMediaItem->SetMediaPath(path);
             m_pMediaContainer->Add(pMediaItem);
 
-            if (nullptr != pCallback) {
-                pCallback->OnLoadedCallback(pMediaItem);
-            }
+            MediaManager::GetSingleton().NotifyEvent(MediaSourceEvent::Create(pMediaItem, kMediaSourceLocal));
 #endif
         }
 

@@ -9,16 +9,11 @@
 
 namespace XSPlayer {
 
-    class MediaSourceCallback {
-    public:
-        virtual void OnLoadedCallback(Media* pMedia) = 0;
-    };
-
     class MediaSource : public std::enable_shared_from_this<MediaSource>{
     public:
         virtual ~MediaSource(void) { }
 
-        virtual bool Load(MediaSourceCallback* pCallback) = 0;
+        virtual bool Load() = 0;
         virtual MediaContainer* GetMediaContainer(void) const = 0;
     };
 

@@ -1,6 +1,9 @@
 ﻿#include "UI/ListItem.h"
 
+#include "Core/MediaManager.h"
+
 #include "MediaList.h"
+#include "UI/UIEvent.h"
 
 namespace XSPlayer {
     ListItem::ListItem(MediaList* pMediaList /*= nullptr*/) 
@@ -71,7 +74,7 @@ namespace XSPlayer {
         return OnNotify(*pNotifyUI);
     }
 
-    bool ListItem::OnNotify(DuiLib::TNotifyUI& event) {
+    bool ListItem::OnNotify(const DuiLib::TNotifyUI& event) {
         if (0 == _tcsicmp(event.sType, _T("itemclick"))) {
             return OnItemClick(event.pSender);
         }
@@ -79,8 +82,10 @@ namespace XSPlayer {
             return OnItemClick(event.pSender);
         }
         else if (0 == _tcsicmp(event.sType, _T("itemactivate"))) {
+            
         }
 
+        MediaManager::GetSingleton().NotifyEvent(UIEvent::Create(event));
         return false;
     }
 

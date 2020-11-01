@@ -16,7 +16,7 @@ namespace XSPlayer {
         explicit SqliteHelper();
         ~SqliteHelper();
 
-        bool Load(MediaSourceCallback* pCallback) override;
+        bool Load() override;
         MediaContainer* GetMediaContainer(void) const override;
 
         bool AddLocalMedia(const String& szPath, String& name);

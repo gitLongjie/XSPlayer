@@ -8,11 +8,11 @@
 
 namespace XSPlayer {
 
-    class OfflineUITab;
-    class OnlineUITab;
-    class RightPannel;
+    class XSControlUI;
     class LrcEvent;
+    class MediaTabControl;
     class RenderEvent;
+    class UIEvent;
 
     class MainFrame : public DuiLib::WindowImplBase, public Application , public EventHandle{
         using supper = DuiLib::WindowImplBase;
@@ -46,15 +46,22 @@ namespace XSPlayer {
         LRESULT OnTrayIcon(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
         void OnInitMediaManager(void);
 
+        bool OnUIEventNotify(UIEvent* uiEvent);
     private:
         bool OnControlEvent(const ControlEvent* pEvent);
         bool OnLrcEvent(const LrcEvent* pEvent);
         bool OnRenderEvent(const RenderEvent* pEvent);
+        bool OnMediaTypeCreateEvent(const MediaSourceTypeCreateEvent* pEvent);
+        bool OnAddMediaItem(const MediaSourceEvent* pEvent);
 
     private:
-        OfflineUITab* m_pOfflineUITab = nullptr;
-        OnlineUITab* m_pOnlineUITab = nullptr;
-        RightPannel* m_pRightPannel = nullptr;
+        void AddXSControl(XSControlUI* pControl);
+        void RemoveXSControl(XSControlUI* pControl);
+        void RemoveAllXSControl(void);
+
+    private:
+        using ListXSControl = std::vector<XSControlUI*>;
+        ListXSControl m_listControl;
 
         NOTIFYICONDATA m_trayIcon = {};
         String m_curPlayTitle;

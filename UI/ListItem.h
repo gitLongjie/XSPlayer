@@ -29,7 +29,7 @@ namespace XSPlayer {
 
     protected:
         virtual DuiLib::CListContainerElementUI* CreateUI(void) = 0;
-        bool OnNotify(DuiLib::TNotifyUI& event);
+        bool OnNotify(const DuiLib::TNotifyUI& event);
         virtual bool OnItemClick(DuiLib::CControlUI* pControl);
 
     private:

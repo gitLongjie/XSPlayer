@@ -61,7 +61,7 @@ namespace XSPlayer {
         bool NotifyEvent(const EventPtr& event);
 
     public:
-        bool AddMediaSource(MediaSourceFactory* pMediaSourceFactory, MediaSourceCallback* pCallback);
+        bool AddMediaSource(MediaSourceFactory* pMediaSourceFactory);
 
     private:
         void Init(void);

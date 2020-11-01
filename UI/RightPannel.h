@@ -2,6 +2,7 @@
 
 #include "Contanst.h"
 #include "Core/Constant.h"
+#include "UI/XSControlUI.h"
 
 #include <chrono>
 
@@ -9,23 +10,20 @@ namespace XSPlayer {
 
     class LrcPannel;
 
-    class RightPannel : public DuiLib::CContainerUI
-        , public DuiLib::INotifyUI {
-        using supper = DuiLib::CContainerUI;
+    class RightPannel : public XSControlUI {
     public:
         RightPannel();
         ~RightPannel() override;
 
     public:
         void Notify(DuiLib::TNotifyUI& msg) override;
+        void InitWindow(void) override;
+        void DoInit(void) override;
 
     public:
         LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-        void InitWindow(void);
-
     private:
-        void Init(void);
         bool OnPlayMedia(void);
         bool OnPlayMedida(DuiLib::CControlUI* pControl);
         bool OnPlayLocalMedia(void);

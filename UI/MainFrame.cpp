@@ -3,6 +3,8 @@
 #include "UI/OnlineUITab.h"
 #include "UI/RightPannel.h"
 #include "UI/MediaList.h"
+#include "UI/MediaTabControl.h"
+#include "UI/UIEvent.h"
 
 #include "Decode/DecodeHandleChain.h"
 #include "Render/AudioRenderChain.h"
@@ -23,25 +25,17 @@ namespace XSPlayer {
     }
 
     MainFrame::~MainFrame() {
+        RemoveAllXSControl();
         m_trayIcon.hIcon = NULL;
         Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
         MediaManager::GetSingleton().UnregistEvent(this);
     }
 
     void MainFrame::InitWindow() {
-        if (nullptr != m_pOfflineUITab) {
-            m_pOfflineUITab->InitWindow();
+        for (auto& item : m_listControl) {
+            item->InitWindow();
         }
-
-        if (nullptr != m_pOnlineUITab) {
-            m_pOnlineUITab->InitWindow();
-        }
-
-        if (nullptr != m_pRightPannel) {
-            m_pRightPannel->InitWindow();
-        }
-
-        AddTrayIcon();
+  //      AddTrayIcon();
         OnInitMediaManager();
     }
 
@@ -53,9 +47,9 @@ namespace XSPlayer {
     LRESULT MainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         LRESULT hr = 0;
 
-        HAND_WINDOW_MESSAGE(m_pOfflineUITab);
-        HAND_WINDOW_MESSAGE(m_pOnlineUITab);
-        HAND_WINDOW_MESSAGE(m_pRightPannel);
+        for (auto& item : m_listControl) {
+            item->HandleMessage(uMsg, wParam, lParam);
+        }
 
         BOOL bret = false;
         switch (uMsg) {
@@ -118,28 +112,24 @@ namespace XSPlayer {
 
     DuiLib::CControlUI* MainFrame::CreateControl(LPCTSTR pstrClass) {
         if (0 == _tcsicmp(pstrClass, kOfflineUI)) {
-            m_pOfflineUITab = new OfflineUITab(&m_PaintManager);
-            DuiLib::INotifyUI* pOfflineUINotify = dynamic_cast<DuiLib::INotifyUI*>(m_pOfflineUITab);
-            if (nullptr != pOfflineUINotify) {
-                m_PaintManager.AddNotifier(pOfflineUINotify);
-            }
-            return m_pOfflineUITab;
+            OfflineUITab* pOfflineUITab = new OfflineUITab();
+            AddXSControl(pOfflineUITab);
+            return pOfflineUITab;
         }
         else if (0 == _tcsicmp(pstrClass, kOnlineUI)) {
-            m_pOnlineUITab = new OnlineUITab(&m_PaintManager);
-            DuiLib::INotifyUI* pUINotify = dynamic_cast<DuiLib::INotifyUI*>(m_pOnlineUITab);
-            if (nullptr != m_pOnlineUITab) {
-                m_PaintManager.AddNotifier(m_pOnlineUITab);
-            }
-            return m_pOnlineUITab;
+            OnlineUITab* pOnlineUITab = new OnlineUITab;
+            AddXSControl(pOnlineUITab);
+            return pOnlineUITab;
         }
         else if (0 == _tcsicmp(pstrClass, kRightPannelUI)) {
-            m_pRightPannel = new RightPannel;
-            DuiLib::INotifyUI* pRightNotify = dynamic_cast<DuiLib::INotifyUI*>(m_pRightPannel);
-            if (nullptr != pRightNotify) {
-                m_PaintManager.AddNotifier(pRightNotify);
-            }
-            return m_pRightPannel;
+            RightPannel* pRightPannel = new RightPannel;
+            AddXSControl(pRightPannel);
+            return pRightPannel;
+        }
+        else if (0 == _tcsicmp(pstrClass, kMediaListTab)) {
+            MediaTabControl* pTabControl = new MediaTabControl;
+            AddXSControl(pTabControl);
+            return pTabControl;
         }
         
         return nullptr;
@@ -160,6 +150,18 @@ namespace XSPlayer {
             auto pRenderEvent = std::dynamic_pointer_cast<RenderEvent>(pEvent);
             OnRenderEvent(pRenderEvent.get());
             return false;
+        }
+        else if (EVENT_SOURCE_TYPE == pEvent->GetID()) {
+            auto pSourceTypeCreate = std::dynamic_pointer_cast<MediaSourceTypeCreateEvent>(pEvent);
+            return OnMediaTypeCreateEvent(pSourceTypeCreate.get());
+        }
+        else if (EVENT_SOURCE == pEvent->GetID()) {
+            auto pSourceEvent = std::dynamic_pointer_cast<MediaSourceEvent>(pEvent);
+            return OnAddMediaItem(pSourceEvent.get());
+        }
+        else if (EVENT_UI == pEvent->GetID()) {
+            auto uiEvent = std::dynamic_pointer_cast<UIEvent>(pEvent);
+            return OnUIEventNotify(uiEvent.get());
         }
         
 
@@ -199,10 +201,10 @@ namespace XSPlayer {
     void MainFrame::OnExit(DuiLib::TNotifyUI& msg) {
         ShowWindow(SW_HIDE);
 
-//         MediaManager::GetSingleton().Stop();
-//         m_trayIcon.hIcon = NULL;
-//         Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
-//         ::PostQuitMessage(0);
+        MediaManager::GetSingleton().Stop();
+        m_trayIcon.hIcon = NULL;
+        Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
+        ::PostQuitMessage(0);
  //       ShowWindow(SW_HIDE);
     }
 
@@ -269,9 +271,20 @@ namespace XSPlayer {
 
     void MainFrame::OnInitMediaManager(void) {
         SqliteHelperFactory sqlitFactory;
-        MediaManager::GetSingleton().AddMediaSource(&sqlitFactory, m_pOfflineUITab);
+        MediaManager::GetSingleton().AddMediaSource(&sqlitFactory);
         MediaSource9KuFactory kuFactory;
-        MediaManager::GetSingleton().AddMediaSource(&kuFactory, m_pOnlineUITab);
+        MediaManager::GetSingleton().AddMediaSource(&kuFactory);
+    }
+
+    bool MainFrame::OnUIEventNotify(UIEvent* uiEvent) {
+        if (nullptr == uiEvent) {
+            return false;
+        }
+
+        for (auto& item : m_listControl) {
+            item->Notify(const_cast<DuiLib::TNotifyUI&>(uiEvent->GetNotifyMessage()));
+        }
+        return true;
     }
 
     bool MainFrame::OnControlEvent(const ControlEvent* pEvent) {
@@ -317,6 +330,55 @@ namespace XSPlayer {
         }
         
         return true;
+    }
+
+    bool MainFrame::OnMediaTypeCreateEvent(const MediaSourceTypeCreateEvent* pEvent) {
+        if (nullptr == pEvent) {
+            return false;
+        }
+
+        const String* txt = new String(pEvent->GetText());
+        const String* source =  new String(pEvent->GetSource());
+        PostMessage(WM_ADD_MEDIA_TYEP_ITEM,
+                    reinterpret_cast<WPARAM>(txt),
+                    reinterpret_cast<LPARAM>(source));
+        return true;
+    }
+
+    bool MainFrame::OnAddMediaItem(const MediaSourceEvent* pEvent) {
+        if (nullptr == pEvent) {
+            return false;
+        }
+
+        const String* source = new String(pEvent->GetSource());
+
+        PostMessage(WM_ADD_LISTITEM,
+                    reinterpret_cast<WPARAM>(source),
+                    reinterpret_cast<LPARAM>(pEvent->GetMedia()));
+        return true;
+    }
+
+    void MainFrame::AddXSControl(XSControlUI* pControl) {
+        auto itor = std::find(m_listControl.begin(), m_listControl.end(), pControl); 
+        if (m_listControl.end() != itor) {
+            return;
+        }
+
+        m_listControl.emplace_back(pControl);
+    }
+
+    void MainFrame::RemoveXSControl(XSControlUI* pControl) {
+        auto itor = std::find(m_listControl.begin(), m_listControl.end(), pControl);
+        if (m_listControl.end() == itor) {
+            return;
+        }
+
+        m_listControl.erase(itor);
+        delete pControl;
+    }
+
+    void MainFrame::RemoveAllXSControl(void) {
+        m_listControl.clear();
     }
 
 }

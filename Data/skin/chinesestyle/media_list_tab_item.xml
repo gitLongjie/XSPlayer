@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+    <HorizontalLayout>
+        <Label maxwidth="20" maxheight="20" bkimage="file='Data/skin/image/head.jpg'"></Label>
+        <Label text="测试tabl" maxwidth="30" ></Label>
+    </HorizontalLayout>
+</Window>

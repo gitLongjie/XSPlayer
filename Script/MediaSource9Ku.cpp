@@ -22,8 +22,8 @@ namespace XSPlayer {
         MediaManager::GetSingleton().UnregistEvent(this);
     }
 
-    bool MediaSource9Ku::Load(MediaSourceCallback* pCallback) {
-        TaskPtr pTask = CreateTask(std::bind(&MediaSource9Ku::OnLoad, this,pCallback, shared_from_this()));
+    bool MediaSource9Ku::Load(void) {
+        TaskPtr pTask = CreateTask(std::bind(&MediaSource9Ku::OnLoad, this, shared_from_this()));
         m_threadId = ThreadPool::PushTask(pTask, m_threadId);
         return ThreadPool::IsInvalideThreadId(m_threadId);
     }
@@ -53,7 +53,6 @@ namespace XSPlayer {
     }
 
     bool MediaSource9Ku::BuilderMediaByType(MediaContainer* pMediaContainer,
-                                            MediaSourceCallback* pCallback,
                                             PyModule* pPyModule) {
         if (nullptr == pPyModule || nullptr == pMediaContainer) {
             return false;
@@ -67,7 +66,7 @@ namespace XSPlayer {
             return false;
         }
        
-        return ParseMediaItems(strContent, pMediaContainer, pCallback);
+        return ParseMediaItems(strContent, pMediaContainer);
     }
 
     void MediaSource9Ku::Test() {
@@ -83,8 +82,7 @@ namespace XSPlayer {
     }
 
     bool MediaSource9Ku::ParseMediaContents(const String& content,
-                                            MediaContainer* pMediaContainer,
-                                            MediaSourceCallback* pCallback) {
+                                            MediaContainer* pMediaContainer) {
         if (nullptr == pMediaContainer) {
             return false;
         }
@@ -105,14 +103,15 @@ namespace XSPlayer {
             if (item.HasMember("url") && item["url"].IsString() &&
                 item.HasMember("type") && item["type"].IsString()) {
                 std::string type = Utils::UnicodeToGBK(item["type"].GetString());
+                std::string url = item["url"].GetString();
                 auto pMediaContent = new MediaContainer(type);
                 size_t mediaId = MediaManager::GetSingleton().GenerateMeidaId();
                 pMediaContent->SetMediaID(mediaId);
-                pMediaContent->SetMediaPath(item["url"].GetString());
+                pMediaContent->SetMediaPath(url);
                 pMediaContainer->Add(pMediaContent);
-                if (nullptr != pCallback) {
-                    pCallback->OnLoadedCallback(pMediaContent);
-                }
+
+                MediaManager::GetSingleton().NotifyEvent(MediaSourceTypeCreateEvent::Create(
+                    type, url));
             }
         }
 
@@ -120,8 +119,7 @@ namespace XSPlayer {
     }
 
     bool MediaSource9Ku::ParseMediaItems(const String& content,
-                                         MediaContainer* pMediaContainer,
-                                         MediaSourceCallback* pCallback) {
+                                         MediaContainer* pMediaContainer) {
         if (nullptr == pMediaContainer) {
             return false;
         }
@@ -143,7 +141,7 @@ namespace XSPlayer {
             if (item.IsInt()) {
                 int mediaID = item.GetInt();
                 TaskPtr pTask = CreateTask(std::bind(&MediaSource9Ku::OnLoadMedia, this,
-                                           mediaID, pMediaContainer, pCallback,
+                                           mediaID, pMediaContainer,
                                            shared_from_this()));
                 ThreadPool::PushTask(pTask, ThreadPool::InvalidThreadId());
             }
@@ -152,7 +150,7 @@ namespace XSPlayer {
         return true;
     }
 
-    bool MediaSource9Ku::ParseMedia(const String& content, MediaContainer* pMediaContainer, MediaSourceCallback* pCallback) {
+    bool MediaSource9Ku::ParseMedia(const String& content, MediaContainer* pMediaContainer) {
         if (nullptr == pMediaContainer) {
             return false;
         }
@@ -175,15 +173,14 @@ namespace XSPlayer {
             pMediaItem->SetArtist(singer);
             pMediaItem->SetMediaPath(url);
             pMediaContainer->Add(pMediaItem);
-
-            if (nullptr != pCallback) {
-                pCallback->OnLoadedCallback(pMediaItem);
-            }
+            const String& type = pMediaContainer->GetMediaPath();
+            MediaManager::GetSingleton().NotifyEvent(MediaSourceEvent::Create(pMediaItem, type));
         }
+
         return true;
     }
 
-    void MediaSource9Ku::OnLoad(MediaSourceCallback* pCallback, MediaSourceWPtr pWMediaSource) {
+    void MediaSource9Ku::OnLoad(MediaSourceWPtr pWMediaSource) {
         if (nullptr == pWMediaSource.lock()) {
             return;
         }
@@ -198,7 +195,7 @@ namespace XSPlayer {
             return;
         }
 
-        if (!ParseMediaContents(strContent, m_pMediaContainer, pCallback)) {
+        if (!ParseMediaContents(strContent, m_pMediaContainer)) {
             PyEnvironment::ReleaseThreadContext(pyThreadContext);
             return;
         }
@@ -210,14 +207,13 @@ namespace XSPlayer {
                 continue;
             }
 
-            BuilderMediaByType(pMediaContent, pCallback, &pPyModule);
+            BuilderMediaByType(pMediaContent, &pPyModule);
         }
         PyEnvironment::ReleaseThreadContext(pyThreadContext);
     }
 
     void MediaSource9Ku::OnLoadMedia(const int songID,
                                      MediaContainer* pMediaContainer,
-                                     MediaSourceCallback* pCallback,
                                      MediaSourceWPtr pWMediaSource) {
         
         MediaSourcePtr pThis = pWMediaSource.lock();
@@ -237,8 +233,8 @@ namespace XSPlayer {
         }
 
         args.Destroy();
-        ParseMedia(strContent, pMediaContainer, pCallback);
         PyEnvironment::ReleaseThreadContext(pContext);
+        ParseMedia(strContent, pMediaContainer);
     }
 
     void MediaSource9Ku::OnLoadLrcContent(const String mediaPath) {

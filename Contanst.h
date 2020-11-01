@@ -27,10 +27,18 @@ namespace XSPlayer {
 
     extern const TCHAR* const kOfflineSource;
     extern const TCHAR* const kLrcPannel;
+    extern const TCHAR* const kMediaListTab;
+    extern const TCHAR* const kMediaListTabItem;
+
+    extern const TCHAR* const kMediaSourceLocal;
 
 #define MAX_AUDIO_FRAME_SIZE 192000 
 
 #define WM_OFFLINE_LOADMEIDA WM_USER + 50
+
+#define WM_ADD_LISTITEM (WM_OFFLINE_LOADMEIDA + 210)
+#define WM_ADD_MEDIA_TYEP_ITEM (WM_OFFLINE_LOADMEIDA + 211)
+
 #define WM_OFFLINE_ADD_LISTITEM (WM_OFFLINE_LOADMEIDA + 1)
 #define WM_OFFLINE_NEXT (WM_OFFLINE_ADD_LISTITEM + 5)
 #define WM_OFFLINE_PLAY (WM_OFFLINE_ADD_LISTITEM + 6)

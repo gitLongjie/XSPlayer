@@ -18,12 +18,13 @@ namespace XSPlayer {
     }
 
     DuiLib::CControlUI* BuildCallback::CreateControl(LPCTSTR pstrClass) {
-        if (0 == _tcsicmp(pstrClass, kMediaListUI)) {
-            return new MediaList(m_pPaintManagerUI);
-        }
-        else if (0 == _tcsicmp(pstrClass, kLrcPannel)) {
+//         if (0 == _tcsicmp(pstrClass, kMediaListUI)) {
+//             return new MediaList();
+//         }
+        if (0 == _tcsicmp(pstrClass, kLrcPannel)) {
             return new LrcPannel;
         }
+        
         return nullptr;
     }
 

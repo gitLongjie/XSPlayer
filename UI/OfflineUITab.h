@@ -4,28 +4,27 @@
 #include "Core/Constant.h"
 #include "Core/MediaSource.h"
 
+#include "UI/XSControlUI.h"
+
 namespace XSPlayer {
 
-    class OfflineUITab : public DuiLib::CContainerUI
-        , public DuiLib::INotifyUI
-        , public MediaSourceCallback {
-        using supper = DuiLib::CContainerUI;
+    class OfflineUITab : public XSControlUI {
     public:
-        OfflineUITab(DuiLib::CPaintManagerUI* pPaintManagerUI);
+        explicit OfflineUITab(void);
         ~OfflineUITab() override;
 
     public:
         void DoEvent(DuiLib::TEventUI& event) override;
         void Notify(DuiLib::TNotifyUI& msg) override;
 
-        void OnLoadedCallback(Media* pMedia) override;
-
     public:
+        void DoInit(void) override;
+        void InitWindow(void) override;
+
         LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-        void InitWindow();
 
     private:
-        void Init(DuiLib::CPaintManagerUI* pPaintManagerUI);
+        
         void LoadLocalMedia(std::vector<String>& filePath) const;
         void LoadLocalMediaFolder();
         void DeleteLocalMedia();
@@ -37,6 +36,5 @@ namespace XSPlayer {
         void SortByNumber();
 
         void LastMedia(const MediaSourceType sourceType);
-        void StopMedia();
     };
 }

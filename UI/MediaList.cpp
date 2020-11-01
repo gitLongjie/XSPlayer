@@ -1,5 +1,8 @@
 ﻿#include "UI/MediaList.h"
 
+#include "Core/Event.h"
+#include "Core/MediaManager.h"
+
 #include "UI/ListItem.h"
 #include <DuiLib/UIlib.h>
 
@@ -7,9 +10,9 @@
 namespace XSPlayer {
     DuiLib::CDialogBuilder MediaList::m_listElementBuilder;
 
-    MediaList::MediaList(DuiLib::CPaintManagerUI* pPaintManagerUI)
+    MediaList::MediaList(const String& mediaSource)
         : DuiLib::CListUI()
-        , m_pPaintManagerUI(pPaintManagerUI)
+        , m_strMediaSource(mediaSource)
         , m_pRoot(new MediaContainer()) {
 
     }
@@ -48,6 +51,22 @@ namespace XSPlayer {
         }
 
         return pListItem->SetMediaParent(m_pRoot);
+    }
+
+    bool MediaList::Add(const String& mediaSource, Media* pMedia) {
+        if (m_strMediaSource != mediaSource) {
+            return false;
+        }
+
+        auto pMediaListItem = new MediaListItem(pMedia->GetText());
+        pMediaListItem->SetMediaID(pMedia->GetMediaId());
+
+        auto pMediaItem = dynamic_cast<MediaItem*>(pMedia);
+        if (nullptr != pMediaItem) {
+            pMediaListItem->SetMediaArtist(pMediaItem->GetAirt());
+        }
+        
+        return Add(pMediaListItem);
     }
 
     bool MediaList::Remove(CControlUI* pControl, bool bDoNotDestroy /*= false*/) {
@@ -117,11 +136,18 @@ namespace XSPlayer {
 
     DuiLib::CListContainerElementUI* MediaList::CreateElementUI() const {
         if (!m_listElementBuilder.GetMarkup()->IsValid()) {
-            return static_cast<DuiLib::CListContainerElementUI*>(m_listElementBuilder.Create(_T("Data/skin/chinesestyle/media_list_item.xml"), (UINT)0, NULL, m_pPaintManagerUI));
+            return static_cast<DuiLib::CListContainerElementUI*>(m_listElementBuilder.Create(_T("Data/skin/chinesestyle/media_list_item.xml"), (UINT)0, NULL, GetManager()));
         }
         else {
-            return static_cast<DuiLib::CListContainerElementUI*>(m_listElementBuilder.Create((UINT)0, m_pPaintManagerUI));
+            return static_cast<DuiLib::CListContainerElementUI*>(m_listElementBuilder.Create((UINT)0, GetManager()));
         }
+    }
+
+    bool MediaList::Compare(const String& mediaSource) const {
+        return 0 == m_strMediaSource.compare(mediaSource) ;
+    }
+
+    void MediaList::UnInit(void) {
     }
 
     void MediaList::UpdateStatus(int index) {

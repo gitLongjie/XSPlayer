@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window>
+<VerticalLayout>
+    <HorizontalLayout inset="0, 2, 0, 0">
+        <VerticalLayout width="100" name="tab_header">
+        </VerticalLayout>
+        <TabLayout name="tab_body" width="200" bkcolor="#FF757676">
+        </TabLayout>
+    </HorizontalLayout>
+</VerticalLayout>
+</Window>

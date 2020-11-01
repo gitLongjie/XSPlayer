@@ -4,33 +4,30 @@
 #include "Core/Constant.h"
 #include "Core/MediaSource.h"
 
+#include "UI/XSControlUI.h"
+
 namespace XSPlayer {
     class MediaList;
     class MediaListItemContainer;
     class MediaSource9Ku;
     class MediaItem;
 
-    class OnlineUITab : public DuiLib::CContainerUI
-        , public DuiLib::INotifyUI
-        , public MediaSourceCallback {
-        using supper = DuiLib::CContainerUI;
+    class OnlineUITab : public XSControlUI {
     public:
-        OnlineUITab(DuiLib::CPaintManagerUI* pPaintManagerUI);
+        explicit OnlineUITab(void);
         ~OnlineUITab() override;
 
     public:
         void DoEvent(DuiLib::TEventUI& event) override;
         void Notify(DuiLib::TNotifyUI& msg) override;
 
-        void OnLoadedCallback(Media* pMedia) override;
-
     public:
+        void DoInit(void) override;
+        void InitWindow(void) override;
+
         LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-        void InitWindow();
 
     private:
-        void Init(DuiLib::CPaintManagerUI* pPaintManagerUI);
-
         void OnAddListItem(UINT uMsg, WPARAM wParam, LPARAM lParam);
         void NextMedia(const MediaSourceType sourceType);
 

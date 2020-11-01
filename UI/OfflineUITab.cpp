@@ -17,8 +17,7 @@
 
 namespace XSPlayer {
 
-    OfflineUITab::OfflineUITab(DuiLib::CPaintManagerUI* pPaintManagerUI) : supper() {
-        Init(pPaintManagerUI);
+    OfflineUITab::OfflineUITab() : XSControlUI() {
     }
 
     OfflineUITab::~OfflineUITab() {
@@ -29,7 +28,7 @@ namespace XSPlayer {
         if (event.Type == DuiLib::UIEVENT_BUTTONDOWN) {
             return;
         }
-        supper::DoEvent(event);
+        __super::DoEvent(event);
     }
 
     void OfflineUITab::Notify(DuiLib::TNotifyUI& msg) {
@@ -75,17 +74,6 @@ namespace XSPlayer {
         }
     }
 
-    void OfflineUITab::OnLoadedCallback(Media* pMedia) {
-        if (nullptr == pMedia) {
-            return;
-        }
-        
-        auto pMeidaListItem = new MediaListItem(pMedia->GetText());
-        pMeidaListItem->SetMediaID(pMedia->GetMediaId());
-        pMeidaListItem->SetMediaPath(pMedia->GetMediaPath());
-        PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_ADD_LISTITEM, 0, (LPARAM)pMeidaListItem);
-    }
-
     LRESULT OfflineUITab::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         switch (uMsg)
         {
@@ -111,12 +99,6 @@ namespace XSPlayer {
             LastMedia(*sourceType);
         }break;
 
-        case WM_CHANGE_STOP_PLAY:
-        {
-            StopMedia();
-        }break;
-
-
         default:
             break;
         }
@@ -125,6 +107,7 @@ namespace XSPlayer {
     }
 
     void OfflineUITab::InitWindow() {
+        __super::InitWindow();
 //         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOfflineList));
 //         if (nullptr == pList) {
 //             return;
@@ -155,9 +138,9 @@ namespace XSPlayer {
 //         }
     }
 
-    void OfflineUITab::Init(DuiLib::CPaintManagerUI* pPaintManagerUI) {
+    void OfflineUITab::DoInit(void) {
         DuiLib::CDialogBuilder dailogBuilder;
-        BuildCallback callback(pPaintManagerUI);
+        BuildCallback callback(m_pManager);
         DuiLib::CContainerUI* pContainerUI = dynamic_cast<DuiLib::CContainerUI*>(dailogBuilder.Create(_T("Data/skin/chinesestyle/offline_tab.xml"), (UINT)0, &callback));
         if (nullptr != pContainerUI) {
             Add(pContainerUI);
@@ -318,8 +301,4 @@ namespace XSPlayer {
         pList->SelectItem(nCur);
         PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_PLAY, nCur, 0);
     }
-
-    void OfflineUITab::StopMedia() {
-    }
-
 }
