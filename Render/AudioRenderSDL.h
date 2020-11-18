@@ -25,9 +25,8 @@ namespace XSPlayer {
 
     class AudioRenderSDL {
     public:
-        AudioRenderSDL(AudioRenderChain* pAudioChain);
+        explicit AudioRenderSDL(AudioRenderChain* pAudioChain);
         ~AudioRenderSDL(void);
-
 
         void Init(const FFMpegContextPtr& pContext);
         void Uninit(void);
@@ -47,6 +46,7 @@ namespace XSPlayer {
 
 
     private:
+        mutable std::mutex m_sdlMutex;
         SDL_AudioDeviceID device;
         bool m_isOpenAudio = false;
 

@@ -8,6 +8,7 @@
 
 #include "Core/Constant.h"
 #include "Core/MediaManager.h"
+#include "Core/MediaItem.h"
 #include "Utils.h"
 
 #include "UI/Menu.h"
@@ -70,7 +71,7 @@ namespace XSPlayer {
                 return;
             }
             int nCurSel = pList->GetCurSel();
-            PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_PLAY, nCurSel, 0);
+            PostMessage(m_pManager->GetPaintWindow(), WM_MEDIA_PLAY, nCurSel, 0);
         }
     }
 
@@ -87,16 +88,15 @@ namespace XSPlayer {
             PushToList(std::move(filePath));
         } break;
 
-        case WM_OFFLINE_NEXT:
+        case WM_PLAY_MEDIA_NEXT:
         case WM_CHANGE_NEXT_PLAY:
         {
             NextMedia();
         }break;
 
-        case WM_CHANGE_LAST_PLAY:
+        case WM_PLAY_MEDIA_LAST:
         {
-            MediaSourceType* sourceType = reinterpret_cast<MediaSourceType*>(lParam);
-            LastMedia(*sourceType);
+           
         }break;
 
         default:
@@ -106,36 +106,46 @@ namespace XSPlayer {
         return 0;
     }
 
+    void OfflineUITab::AddMedia(const Media* pMedia) {
+        if (nullptr == m_pMediaList || nullptr == pMedia) {
+            return;
+        }
+
+        auto pMediaItem = dynamic_cast<const MediaItem*>(pMedia);
+        if (nullptr == pMediaItem) {
+            return;
+        }
+
+        auto pMediaListItem = new MediaListItem(pMediaItem->GetText());
+        pMediaListItem->SetMediaID(pMediaItem->GetMediaId());
+        pMediaListItem->SetMediaArtist(pMediaItem->GetAirt());
+        m_pMediaList->Add(pMediaListItem);
+    }
+
+    void OfflineUITab::RemoveAllMedia(void) {
+        if (nullptr == m_pMediaList) {
+            return;
+        }
+
+        m_pMediaList->RemoveAll();
+    }
+
+    bool OfflineUITab::PlayNext(void) {
+        NextMedia();
+        return true;
+    }
+
+    bool OfflineUITab::PlayLast(void) {
+        LastMedia();
+        return true;
+    }
+
     void OfflineUITab::InitWindow() {
         __super::InitWindow();
-//         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOfflineList));
-//         if (nullptr == pList) {
-//             return;
-//         }
-// 
-//         auto pMediaList = dynamic_cast<MediaList*>(pList);
-//         if (nullptr == pMediaList) {
-//             return;            
-//         }
-// 
-//         int nCount = MediaManager::GetSingleton().GetMediaCount();
-//         for (int index = 0; index < nCount; ++index) {
-//             const String name = MediaManager::GetSingleton().GetLocalMedia(index);
-//             auto pMediaListItem = new MediaListItem(name.c_str());
-//             pMediaListItem->SetText(name.c_str());
-//             pMediaListItem->SetMediaArtist(_T("未知"));
-//             pMediaList->Add(pMediaListItem);
-//         }
-// 
-//         int curPlay = MediaManager::GetSingleton().GetCurrentPlay();
-// 
-//         if (nCount >= 0) {
-//             if (curPlay != -1) {
-//                 pList->SelectItem(curPlay);
-//                 return;
-//             }
-//             pList->SelectItem(0);
-//         }
+        if (nullptr == m_pManager) {
+            return;
+        }
+        m_pMediaList = dynamic_cast<MediaList*>(m_pManager->FindControl(kOfflineList));
     }
 
     void OfflineUITab::DoInit(void) {
@@ -148,6 +158,8 @@ namespace XSPlayer {
         else {
             RemoveAll();
         }
+
+        __super::DoInit();
     }
 
     void OfflineUITab::LoadLocalMedia(std::vector<String>& filePaths) const {
@@ -270,7 +282,7 @@ namespace XSPlayer {
         }
         nCur += 1;
         pList->SelectItem(nCur);
-        PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_PLAY, nCur, 0);
+        PostMessage(m_pManager->GetPaintWindow(), WM_MEDIA_PLAY, nCur, 0);
     }
 
     void OfflineUITab::SortByNumber() {
@@ -283,22 +295,17 @@ namespace XSPlayer {
         MediaManager::GetSingleton().SortLocalMediaByNumberName();
     }
 
-    void OfflineUITab::LastMedia(const MediaSourceType sourceType) {
-        if (sourceType != MediaSourceType::MST_LOCAL) {
+    void OfflineUITab::LastMedia(void) {
+        if (nullptr == m_pMediaList) {
             return;
         }
 
-        DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOfflineList));
-        if (nullptr == pList) {
-            return;
-        }
-
-        int nCur = pList->GetCurSel();
+        int nCur = m_pMediaList->GetCurSel();
         if (nCur <= 0) {
             return;
         }
         nCur -= 1;
-        pList->SelectItem(nCur);
-        PostMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_PLAY, nCur, 0);
+        m_pMediaList->SelectItem(nCur);
+        PostMessage(m_pManager->GetPaintWindow(), WM_MEDIA_PLAY, nCur, 0);
     }
 }

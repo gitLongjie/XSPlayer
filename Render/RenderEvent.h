@@ -12,16 +12,16 @@ namespace XSPlayer {
             RENDER_POS
         };
     public:
-        RenderEvent(Type type, size_t len);
+        RenderEvent(Type type, float len);
         ~RenderEvent(void) override;
 
         Type GetContent(void) const;
-        size_t GetLength(void) const;
+        float GetLength(void) const;
 
-        static EventPtr Create(Type type, size_t len);
+        static EventPtr Create(Type type, float len);
 
     private:
-        size_t m_len = 0;
+        float m_len = 0;
         Type m_type = Type::UNKNOWN;
     };
 

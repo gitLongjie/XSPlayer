@@ -5,6 +5,8 @@
 #include "UI/XSControlUI.h"
 
 namespace XSPlayer {
+    class OfflineUITab;
+    class Media;
 
     class MediaTabControl : public XSControlUI {
     public:
@@ -24,14 +26,15 @@ namespace XSPlayer {
 
     protected:
         DuiLib::COptionUI* CreateTabUI(void);
-        DuiLib::CControlUI* CreateTabBody(const String& mediaSource);
 
     private:
         bool NotifyOption(DuiLib::TNotifyUI& msg);
-        bool OnNotifyOption(DuiLib::COptionUI* pOptionUI);
         bool OnAddMediaTypeTab(WPARAM wParam, LPARAM lParam);
-        bool OnAddList(WPARAM wParam, LPARAM lParam);
+        bool OnAddMedia(WPARAM wParam, LPARAM lParam);
+        bool OnAddToMediaList(Media* pMedia);
         void OnPlay(unsigned int id);
+        bool OnPlayNext();
+        bool OnPlayLast();
 
     private:
         static DuiLib::CDialogBuilder m_optionUIBuilder;
@@ -40,6 +43,7 @@ namespace XSPlayer {
         String m_pushedImage;
         String m_group;
         DuiLib::CVerticalLayoutUI* m_pTabHeader = nullptr;
-        DuiLib::CTabLayoutUI* m_pTabBody = nullptr;
+        OfflineUITab* m_pMediaList = nullptr;
+        String m_curMediaSource;
     };
 }

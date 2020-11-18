@@ -33,7 +33,7 @@ namespace XSPlayer {
 
         void SortByNumber();
 
-        void LastMedia(const MediaSourceType sourceType);
+        void LastMedia(void);
         void StopMedia();
 
         void OnAddItem(LPARAM args);

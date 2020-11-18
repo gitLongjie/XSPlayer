@@ -31,7 +31,7 @@ namespace XSPlayer {
         OnHandle(lrc);
     }
 
-    void LrcPannel::UpdateLrc(size_t tm) {
+    void LrcPannel::UpdateLrc(float tm) {
         int index = GetCurrentLrc(tm);
         if (m_curIndex == index) {
             return;
@@ -116,7 +116,7 @@ namespace XSPlayer {
         return mutie * 60 + scend;
     }
 
-    int LrcPannel::GetCurrentLrc(size_t tm) {
+    int LrcPannel::GetCurrentLrc(float tm) {
         if (0 == tm) {
             return 0;
         }
@@ -162,7 +162,7 @@ namespace XSPlayer {
         
     }
 
-    int LrcItem::Compare(const size_t tm) const {
+    int LrcItem::Compare(const float tm) const {
         if (tm < m_tm) {
             return -1;
         }

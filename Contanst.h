@@ -8,7 +8,7 @@ namespace XSPlayer {
     extern const TCHAR* const kClick;
     extern const TCHAR* const kSelectChanged;
     extern const TCHAR* const kCloseButtonControlName;
-    extern const TCHAR* const kOfflineUI;
+    extern const TCHAR* const kMediaListTab;
     extern const TCHAR* const kOnlineUI;
     extern const TCHAR* const kRightPannelUI;
     extern const TCHAR* const kMediaListUI;
@@ -27,7 +27,7 @@ namespace XSPlayer {
 
     extern const TCHAR* const kOfflineSource;
     extern const TCHAR* const kLrcPannel;
-    extern const TCHAR* const kMediaListTab;
+    extern const TCHAR* const kMediaControlTab;
     extern const TCHAR* const kMediaListTabItem;
 
     extern const TCHAR* const kMediaSourceLocal;
@@ -40,8 +40,8 @@ namespace XSPlayer {
 #define WM_ADD_MEDIA_TYEP_ITEM (WM_OFFLINE_LOADMEIDA + 211)
 
 #define WM_OFFLINE_ADD_LISTITEM (WM_OFFLINE_LOADMEIDA + 1)
-#define WM_OFFLINE_NEXT (WM_OFFLINE_ADD_LISTITEM + 5)
-#define WM_OFFLINE_PLAY (WM_OFFLINE_ADD_LISTITEM + 6)
+#define WM_PLAY_MEDIA_NEXT (WM_OFFLINE_ADD_LISTITEM + 5)
+#define WM_MEDIA_PLAY (WM_OFFLINE_ADD_LISTITEM + 6)
 
 #define WM_ONLINE_ADD_LISTITEM (WM_OFFLINE_LOADMEIDA + 20)
 #define WM_ONLINE_ADD_MEDIAITEM (WM_ONLINE_ADD_LISTITEM + 1)
@@ -53,7 +53,7 @@ namespace XSPlayer {
 
 #define WM_CHANGE_CUR_PLAY (WM_OFFLINE_LOADMEIDA + 50)
 #define WM_CHANGE_NEXT_PLAY (WM_OFFLINE_LOADMEIDA + 51)
-#define WM_CHANGE_LAST_PLAY (WM_OFFLINE_LOADMEIDA + 52)
+#define WM_PLAY_MEDIA_LAST (WM_OFFLINE_LOADMEIDA + 52)
 #define WM_CHANGE_STOP_PLAY (WM_OFFLINE_LOADMEIDA + 53)
 #define WM_MEDIA_LRC_LOADED (WM_OFFLINE_LOADMEIDA + 54)
 

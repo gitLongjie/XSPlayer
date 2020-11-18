@@ -9,7 +9,7 @@ namespace XSPlayer {
 
     class MediaList : public DuiLib::CListUI {
     public:
-        MediaList(const String& mediaSource);
+        MediaList();
         ~MediaList() override;
 
     public:
@@ -22,7 +22,6 @@ namespace XSPlayer {
         bool Add(ListItem* pListItem);
         bool AddAt(ListItem* pListItem, int iIndex);
         bool Remove(ListItem* pListItem, bool bDoNotDestroy = false);
-        bool Add(const String& mediaSource, Media* pMedia);
 
         bool SelectItem(int iIndex, bool bTakeFocus = false, bool bTriggerEvent = true);
 
@@ -30,7 +29,6 @@ namespace XSPlayer {
 
         void Clear(void);
         DuiLib::CListContainerElementUI* CreateElementUI() const;
-        bool Compare(const String& mediaSource) const;
         void UnInit(void);
 
     protected:
@@ -38,7 +36,6 @@ namespace XSPlayer {
 
     private:
         MediaContainer* m_pRoot = nullptr;
-        const String m_strMediaSource;
         static DuiLib::CDialogBuilder m_listElementBuilder;
     };
 

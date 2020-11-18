@@ -18,15 +18,17 @@ namespace XSPlayer {
 #define SDL_AUDIO_MIN_BUFFER_SIZE 512
 #define SDL_AUDIO_MAX_CALLBACKS_PER_SEC 30
 
-    AudioRenderSDL::AudioRenderSDL(AudioRenderChain* pAudioChain) : m_pAudioRenderChain(pAudioChain) {
+    AudioRenderSDL::AudioRenderSDL(AudioRenderChain* pAudioChain)
+        : m_pAudioRenderChain(pAudioChain) {
 
     }
 
     AudioRenderSDL::~AudioRenderSDL(void) {
-
+      
     }
 
     void AudioRenderSDL::Init(const FFMpegContextPtr& pContext) {
+        std::lock_guard<std::mutex> lock(m_sdlMutex);
         SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
         if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS) < 0) {
@@ -39,19 +41,17 @@ namespace XSPlayer {
     }
 
     void AudioRenderSDL::Uninit(void) {
+        m_bPlaying = false;
         {
             std::unique_lock<std::mutex> lock(m_mutex);
-            if (!m_isOpenAudio) {
-                return;
-            }
-            m_isOpenAudio = false;
-            m_bPlaying = false;
             Clear();
             m_conditionVariable.notify_one();
         }
         
+        std::lock_guard<std::mutex> lock(m_sdlMutex);
         SDL_CloseAudioDevice(device);
         SDL_Quit();
+        m_isOpenAudio = false;
     }
 
     int AudioRenderSDL::Render(const FFMpegContextWPtr& pWContext, const FFMpegMediaFramePtr pMediaFrame) {
@@ -69,10 +69,12 @@ namespace XSPlayer {
 
 
     void AudioRenderSDL::Pause() const {
+        std::lock_guard<std::mutex> lock(m_sdlMutex);
         SDL_PauseAudioDevice(device, 1);
     }
 
     void AudioRenderSDL::Continue() const {
+        std::lock_guard<std::mutex> lock(m_sdlMutex);
         SDL_PauseAudioDevice(device, 0);
     }
 
@@ -182,7 +184,7 @@ namespace XSPlayer {
 
     void AudioRenderSDL::RenderAuido(Uint8* stream, int len) {
         int len1 = 0;
-
+        std::lock_guard<std::mutex> lock(m_sdlMutex);
         while (len > 0 && m_bPlaying)
         {
             if (m_audioBufferIndex >= static_cast<int>(m_audioBufferSize)) {
@@ -223,7 +225,7 @@ namespace XSPlayer {
             return false;
         }
 
-        int pts = 0;
+        float pts = 0.0;
         int dataSize = pContext->Resmple(pMediaFrame, &m_audioBuffer, pts);
         if (dataSize < 0) {
             return false;

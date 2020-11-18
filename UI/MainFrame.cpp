@@ -35,7 +35,7 @@ namespace XSPlayer {
         for (auto& item : m_listControl) {
             item->InitWindow();
         }
-  //      AddTrayIcon();
+        AddTrayIcon();
         OnInitMediaManager();
     }
 
@@ -48,7 +48,10 @@ namespace XSPlayer {
         LRESULT hr = 0;
 
         for (auto& item : m_listControl) {
-            item->HandleMessage(uMsg, wParam, lParam);
+            hr = item->HandleMessage(uMsg, wParam, lParam);
+            if (0 != hr) {
+                return hr;
+            }
         }
 
         BOOL bret = false;
@@ -67,7 +70,7 @@ namespace XSPlayer {
             if (nullptr != pTitle) {
                 pTitle->SetText(m_curPlayTitle.c_str());
             }
-        }break;
+        }return 1;
 
         case WM_CHANGE_STOP_PLAY:
         {
@@ -76,7 +79,7 @@ namespace XSPlayer {
             if (nullptr != pTitle) {
                 pTitle->SetText(m_curPlayTitle.c_str());
             }
-        }break;
+        }return 1;
 
         default:
             break;
@@ -111,7 +114,7 @@ namespace XSPlayer {
     }
 
     DuiLib::CControlUI* MainFrame::CreateControl(LPCTSTR pstrClass) {
-        if (0 == _tcsicmp(pstrClass, kOfflineUI)) {
+        if (0 == _tcsicmp(pstrClass, kMediaListUI)) {
             OfflineUITab* pOfflineUITab = new OfflineUITab();
             AddXSControl(pOfflineUITab);
             return pOfflineUITab;
@@ -126,7 +129,7 @@ namespace XSPlayer {
             AddXSControl(pRightPannel);
             return pRightPannel;
         }
-        else if (0 == _tcsicmp(pstrClass, kMediaListTab)) {
+        else if (0 == _tcsicmp(pstrClass, kMediaControlTab)) {
             MediaTabControl* pTabControl = new MediaTabControl;
             AddXSControl(pTabControl);
             return pTabControl;
@@ -200,12 +203,12 @@ namespace XSPlayer {
 
     void MainFrame::OnExit(DuiLib::TNotifyUI& msg) {
         ShowWindow(SW_HIDE);
-
-        MediaManager::GetSingleton().Stop();
-        m_trayIcon.hIcon = NULL;
-        Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
-        ::PostQuitMessage(0);
- //       ShowWindow(SW_HIDE);
+// 
+//         MediaManager::GetSingleton().Stop();
+//         m_trayIcon.hIcon = NULL;
+//         Shell_NotifyIcon(NIM_DELETE, &m_trayIcon);
+//         ::PostQuitMessage(0);
+//         ShowWindow(SW_HIDE);
     }
 
     void MainFrame::OnSelectChanged(DuiLib::TNotifyUI& msg) {
@@ -323,10 +326,11 @@ namespace XSPlayer {
         }
 
         if (RenderEvent::Type::INIT == pEvent->GetContent()) {
-            PostMessage(WM_RIGHTPANNEL_INIT_DURATION, pEvent->GetLength(), 0);
+            PostMessage(WM_RIGHTPANNEL_INIT_DURATION, (WPARAM)pEvent->GetLength(), 0);
         }
         else if (RenderEvent::Type::RENDER_POS == pEvent->GetContent()) {
-            PostMessage(WM_RIGHTPANNEL_UPDATE_DURATION, pEvent->GetLength(), 0);
+            float* pts = new float(pEvent->GetLength());
+            PostMessage(WM_RIGHTPANNEL_UPDATE_DURATION, (WPARAM)pts, 0);
         }
         
         return true;

@@ -18,7 +18,6 @@ namespace XSPlayer {
 
 
     bool AudioRenderChain::Init(const FFMpegContextPtr& pContext) {
-        m_pAudioRenderSDL.reset();
         m_pAudioRenderSDL = std::make_shared<AudioRenderSDL>(this);
         m_pAudioRenderSDL->Init(pContext);
         return true;
@@ -55,6 +54,7 @@ namespace XSPlayer {
         }
 
         m_pAudioRenderSDL->Uninit();
+        m_pAudioRenderSDL.reset();
         return true;
     }
 
@@ -98,7 +98,7 @@ namespace XSPlayer {
     }
 
 
-    void AudioRenderChain::UpdateRenderPostion(size_t len) {
+    void AudioRenderChain::UpdateRenderPostion(float len) {
         EventPtr pEvnet = RenderEvent::Create(RenderEvent::Type::RENDER_POS, len);
         MediaManager::GetSingleton().NotifyEvent(pEvnet);
     }

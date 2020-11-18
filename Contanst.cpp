@@ -5,7 +5,7 @@ namespace XSPlayer {
     const TCHAR* const kSelectChanged = _T("selectchanged");
     const TCHAR* const kCloseButtonControlName = _T("closebtn");
 
-    const TCHAR* const kOfflineUI = _T("OfflineTab");
+    const TCHAR* const kMediaListTab = _T("MediaListTab");
     const TCHAR* const kOnlineUI = _T("OnlineTab");
     const TCHAR* const kRightPannelUI = _T("RightPanel");
     const TCHAR* const kMediaListUI = _T("MediaList");
@@ -25,7 +25,7 @@ namespace XSPlayer {
 
     const TCHAR* const kOfflineSource = _T("localMediaSource");
     const TCHAR* const kLrcPannel = _T("LrcPannel");
-    const TCHAR* const kMediaListTab = _T("MediaListTab");
+    const TCHAR* const kMediaControlTab = _T("MediaControlTab");
     const TCHAR* const kMediaListTabItem = _T("MediaListTabItem");
 
     const TCHAR* const kMediaSourceLocal = _T("MediaSourceLocal");

@@ -72,7 +72,7 @@ namespace XSPlayer {
         static int GetBufferSizeBySample(int channels, int nbSample, int format, bool align);
         static int GetBufferSizeBySample(const FFMpegMediaFramePtr& pFFMpegeMediaFrame);
 
-        int Resmple(const FFMpegMediaFramePtr& pFFMpegeMediaFrame, unsigned char** pAudioData, int& pts);
+        int Resmple(const FFMpegMediaFramePtr& pFFMpegeMediaFrame, unsigned char** pAudioData, float& pts);
 
         FFMpegMediaFramePtr ReadPack(bool& isEof);
         bool Decodec(const FFMpegMediaFramePtr& pMediaFrame, DecoderFrame decodeFrame);

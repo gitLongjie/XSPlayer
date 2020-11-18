@@ -96,7 +96,7 @@ namespace XSPlayer {
         return GetBufferSizeBySample(pAVFrame->channels, pAVFrame->nb_samples, pAVFrame->format, 1);
     }
 
-    int FFMpegContext::Resmple(const FFMpegMediaFramePtr& pFFMpegeMediaFrame, unsigned char** pAudioData, int& pts) {
+    int FFMpegContext::Resmple(const FFMpegMediaFramePtr& pFFMpegeMediaFrame, unsigned char** pAudioData, float& pts) {
         if (nullptr == pFFMpegeMediaFrame) {
             return -1;
         }
@@ -165,7 +165,7 @@ namespace XSPlayer {
              }
 
              AVRational tb = { 1, pFrame->sample_rate };
-             pts = static_cast<int>(pFrame->pts * av_q2d(tb) + (double)pFrame->nb_samples / pFrame->sample_rate);
+             pts = static_cast<float>(pFrame->pts * av_q2d(tb) + (double)pFrame->nb_samples / pFrame->sample_rate);
              return len * m_outAudioParam.channels * av_get_bytes_per_sample((AVSampleFormat)m_outAudioParam.format);
              return outSize; // ret * 3 * av_get_bytes_per_sample((AVSampleFormat)m_outAudioParam.format);
          }
@@ -175,7 +175,7 @@ namespace XSPlayer {
              int dataLen = outSize > pFrame->linesize[0] ? pFrame->linesize[0] : outSize;
              *pAudioData = new unsigned char[outSize] {0};
              memcpy(pAudioData, pFrame->data[0],dataLen);
-             pts = static_cast<int>(pFrame->pts * TIME_BASE);
+             pts = static_cast<float>(pFrame->pts * TIME_BASE);
              return dataLen;
          }
     }

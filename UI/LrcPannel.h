@@ -11,7 +11,7 @@ namespace XSPlayer {
     public:
         LrcItem(size_t tm, size_t index, const String content, const RECT& rect);
         void Draw(HDC hdc, int cur, const RECT& rect);
-        int Compare(const size_t tm) const;
+        int Compare(const float tm) const;
         void UpdateSize(size_t height);
     private:
         size_t m_tm;
@@ -28,7 +28,7 @@ namespace XSPlayer {
     public:
         void PaintText(HDC hDC) override;
         void UpdateContent(const String& lrc);
-        void UpdateLrc(size_t len);
+        void UpdateLrc(float len);
 
     protected:
         bool DrawCurPlay(HDC hDC, const RECT& rect);
@@ -37,7 +37,7 @@ namespace XSPlayer {
     private:
         void OnHandle(const String& lrc);
         int Analysis(const String& content, String& lrc) const;
-        int GetCurrentLrc(size_t tm);
+        int GetCurrentLrc(float tm);
         void UpdateItemPostion(void);
 
     private:

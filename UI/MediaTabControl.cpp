@@ -14,6 +14,7 @@
 #include "UI/MediaList.h"
 #include "UI/ListItem.h"
 #include "UI/BuildCallback.h"
+#include "UI/OfflineUITab.h"
 
 namespace XSPlayer {
 
@@ -51,8 +52,10 @@ namespace XSPlayer {
         __super::InitWindow();
 
         m_pTabHeader = dynamic_cast<DuiLib::CVerticalLayoutUI*>(m_pManager->FindControl("tab_header"));
-        m_pTabBody = dynamic_cast<DuiLib::CTabLayoutUI*>(m_pManager->FindControl("tab_body"));
-
+        m_pMediaList = dynamic_cast<OfflineUITab*>(m_pManager->FindControl("media_list"));
+        if (nullptr != m_pMediaList) {
+            m_pMediaList->InitWindow();
+        }
        // AddTab(_T("本地媒体"), kMediaSourceLocal);
     }
 
@@ -92,27 +95,36 @@ namespace XSPlayer {
         if (NotifyOption(msg)) {
             return;
         }
-
-        if (0 == _tcsicmp(msg.sType, "itemactivate")) {
-            auto* pItem = dynamic_cast<MediaListItem*>(msg.pSender);
-            if (nullptr == pItem) {
-                return;
-            }
-
-            size_t mediaId = pItem->GetMediaId();
-            OnPlay(mediaId);
-        }
+// 
+//         if (0 == _tcsicmp(msg.sType, "itemactivate")) {
+//             const String strID = msg.pSender->GetUserData();
+//             size_t mediaID = -1;
+// 
+// #if defined(UNICODE) || defined(_UNICODE)
+//             mediaID = std::stoul(userData);
+//             pListElementUI->SetUserData(std::to_wstring(mediaID).c_str());
+// #else
+//             mediaID = std::stoul(strID);
+// #endif
+//             OnPlay(mediaID);
+//         }
     }
 
     LRESULT MediaTabControl::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         switch (uMsg) {
         case WM_ADD_LISTITEM:
-            OnAddList(wParam, lParam);
+           return OnAddMedia(wParam, lParam);
             break;
 
         case WM_ADD_MEDIA_TYEP_ITEM:
-            OnAddMediaTypeTab(wParam, lParam);
+            return OnAddMediaTypeTab(wParam, lParam);
             break;
+
+        case WM_PLAY_MEDIA_NEXT:
+            return OnPlayNext();
+
+        case WM_PLAY_MEDIA_LAST:
+            return OnPlayLast();
 
         default:
             break;
@@ -138,13 +150,8 @@ namespace XSPlayer {
         pOption->SetSelectedImage(m_pushedImage.c_str());
         pOption->SetGroup(m_group.c_str());
 
-        DuiLib::CControlUI* pControlUI = CreateTabBody(mediaSource);
-        if (nullptr == pControlUI) {
-            delete pOption;
-            return false;
-        }
-        
-        pOption->SetTag(reinterpret_cast<UINT_PTR>(pControlUI));
+        pOption->SetUserData(mediaSource.c_str());
+        MediaManager::GetSingleton().AddMediaContainter(mediaSource);
 
         return m_pTabHeader->Add(pOption);
     }
@@ -153,63 +160,29 @@ namespace XSPlayer {
         return new DuiLib::COptionUI;
     }
 
-    DuiLib::CControlUI* MediaTabControl::CreateTabBody(const String& mediaSource) {
-        if (nullptr == m_pTabBody) {
-            return nullptr;
-        }
-
-        MediaList* pMediaList = new MediaList(mediaSource);
-        if (nullptr == pMediaList) {
-            return nullptr;
-        }
-
-        m_pTabBody->Add(pMediaList);
-        pMediaList->SetVisible(true);
-        return pMediaList;
-    }
-
     bool MediaTabControl::NotifyOption(DuiLib::TNotifyUI& msg) {
         auto pOptionUI = dynamic_cast<DuiLib::COptionUI*>(msg.pSender);
         if (nullptr == pOptionUI) {
             return false;
         }
 
-        if (nullptr == m_pTabHeader) {
+        if (nullptr == m_pMediaList) {
+            return false;
+        }
+        m_pMediaList->RemoveAllMedia();
+
+        m_curMediaSource = pOptionUI->GetUserData();
+        const auto pMediaContainer = MediaManager::GetSingleton().GetMediaContainer(m_curMediaSource);
+        if (nullptr == pMediaContainer) {
             return false;
         }
 
-        bool flag = false;
-        int count = m_pTabHeader->GetCount();
-        for (int index = 0; index < count; ++index) {
-            DuiLib::CControlUI* pOption = m_pTabHeader->GetItemAt(index);
-            if (msg.pSender == pOption) {
-                flag = true;
-              //  OnNotifyOption(pOptionUI);
-                m_pTabBody->SelectItem(index);
-                break;
-            }
-// 
-//             auto pControlUI = reinterpret_cast<DuiLib::CControlUI*>(pOption->GetTag());
-//             if (nullptr == pControlUI) {
-//                 continue;
-//             }
-// 
-//             pControlUI->SetVisible(false);
-        }
-        return flag;
-    }
-
-    bool MediaTabControl::OnNotifyOption(DuiLib::COptionUI* pOptionUI) {
-        if (nullptr == pOptionUI) {
-            return false;
+        size_t count = pMediaContainer->GetChildernCount();
+        for (size_t index = 0; index < count; ++index) {
+            //PostMessage(m_pManager->GetPaintWindow(), )
+           m_pMediaList->AddMedia(pMediaContainer->GetChild(index));
         }
 
-        auto pControlUI = reinterpret_cast<DuiLib::CControlUI*>(pOptionUI->GetTag());
-        if (nullptr == pControlUI) {
-            return false;
-        }
-
-        pControlUI->SetVisible(true);
         return true;
     }
 
@@ -222,40 +195,30 @@ namespace XSPlayer {
         return flag;
     }
 
-    bool MediaTabControl::OnAddList(WPARAM wParam, LPARAM lParam) {
+    bool MediaTabControl::OnAddMedia(WPARAM wParam, LPARAM lParam) {
         const String* szMediaSource = (reinterpret_cast<String*>(wParam));
         Media* pMedia = reinterpret_cast<Media*>(lParam);
         if (nullptr == pMedia) {
-            return false;
-        }
-
-        MediaList* pMediaList = nullptr;
-        int count = m_pTabHeader->GetCount();
-        for (int index = 0; index < count; ++index) {
-            DuiLib::CControlUI* pOption = m_pTabHeader->GetItemAt(index);
-            if (nullptr == pOption) {
-                continue;
-            }
-
-            auto pList = reinterpret_cast<MediaList*>(pOption->GetTag());
-            if (nullptr == pList) {
-                continue;
-            }
-
-            if (pList->Compare(*szMediaSource)) {
-                pMediaList = pList;
-                break;
-            }
-        }
-
-        if (nullptr == pMediaList) {
             delete szMediaSource;
             return false;
         }
 
-        bool flag = pMediaList->Add(*szMediaSource, pMedia);
+        bool success = MediaManager::GetSingleton().AddMedia(pMedia, *szMediaSource);
+        if (m_curMediaSource == *szMediaSource) {
+            OnAddToMediaList(pMedia);
+        }
+        
         delete szMediaSource;
-        return flag;
+        return success;
+    }
+
+    bool MediaTabControl::OnAddToMediaList(Media* pMedia) {
+        if (nullptr == m_pMediaList) {
+            return false;
+        }
+
+        m_pMediaList->AddMedia(pMedia);
+        return true;
     }
 
     void MediaTabControl::OnPlay(unsigned int id) {
@@ -266,6 +229,24 @@ namespace XSPlayer {
 
         MediaManager::GetSingleton().Stop();
         MediaManager::GetSingleton().PlayMedia(id);
+    }
+
+    bool MediaTabControl::OnPlayNext() {
+        if (nullptr == m_pMediaList) {
+            return false;
+        }
+
+
+        return m_pMediaList->PlayNext();
+    }
+
+    bool MediaTabControl::OnPlayLast() {
+        if (nullptr == m_pMediaList) {
+            return false;
+        }
+
+
+        return m_pMediaList->PlayLast();
     }
 
 }

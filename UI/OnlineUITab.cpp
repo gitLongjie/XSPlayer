@@ -88,10 +88,9 @@ namespace XSPlayer {
             OnMediaItems(lParam);
             break;
 
-        case WM_CHANGE_LAST_PLAY:
+        case WM_PLAY_MEDIA_LAST:
         {
-            MediaSourceType* sourceType = reinterpret_cast<MediaSourceType*>(lParam);
-            LastMedia(*sourceType);
+            LastMedia();
         }break;
 
         case WM_ONLINE_NEXT:
@@ -174,24 +173,19 @@ namespace XSPlayer {
         MediaManager::GetSingleton().SortLocalMediaByNumberName();
     }
 
-    void OnlineUITab::LastMedia(const MediaSourceType sourceType) {
-        if (sourceType != MediaSourceType::MST_9KU_SERVER) {
+    void OnlineUITab::LastMedia(void) {
+        if (nullptr == m_pMediaList) {
             return;
         }
 
-        DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
-        if (nullptr == pList) {
-            return;
-        }
-
-        int nCur = pList->GetCurSel();
+        int nCur = m_pMediaList->GetCurSel();
         if (nCur <= 1) {
             return;
         }
         nCur -= 1;
-        pList->SelectItem(nCur);
+        m_pMediaList->SelectItem(nCur);
         if (IsContainter(nCur)) {
-            LastMedia(sourceType);
+            LastMedia();
             return;
         }
 

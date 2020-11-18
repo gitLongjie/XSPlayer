@@ -7,6 +7,7 @@
 #include "UI/XSControlUI.h"
 
 namespace XSPlayer {
+    class MediaList;
 
     class OfflineUITab : public XSControlUI {
     public:
@@ -23,6 +24,11 @@ namespace XSPlayer {
 
         LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+        void AddMedia(const Media* pMedia);
+        void RemoveAllMedia(void);
+        bool PlayNext(void);
+        bool PlayLast(void);
+
     private:
         
         void LoadLocalMedia(std::vector<String>& filePath) const;
@@ -31,10 +37,13 @@ namespace XSPlayer {
 
         bool PushToList(const std::vector<String>&& filePath);
         void OnAddListItem(UINT uMsg, WPARAM wParam, LPARAM lParam);
-        void NextMedia();
+        void NextMedia(void);
 
         void SortByNumber();
 
-        void LastMedia(const MediaSourceType sourceType);
+        void LastMedia(void);
+
+    private:
+        MediaList* m_pMediaList = nullptr;
     };
 }

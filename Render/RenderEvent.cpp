@@ -7,7 +7,7 @@
 namespace XSPlayer {
 
 
-    RenderEvent::RenderEvent(Type type, size_t len) 
+    RenderEvent::RenderEvent(Type type, float len) 
         : Event(EVENT_RENDER)
         , m_len(len)
         , m_type(type) {
@@ -22,11 +22,11 @@ namespace XSPlayer {
         return m_type;
     }
 
-    size_t RenderEvent::GetLength(void) const {
+    float RenderEvent::GetLength(void) const {
         return m_len;
     }
 
-    EventPtr RenderEvent::Create(RenderEvent::Type type, size_t len) {
+    EventPtr RenderEvent::Create(RenderEvent::Type type, float len) {
         return std::make_shared<RenderEvent>(type, len);
     }
 

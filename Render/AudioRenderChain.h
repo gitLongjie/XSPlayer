@@ -24,7 +24,7 @@ namespace XSPlayer {
         bool Continue(void) override;
 
         void UpdateRenderListSize(size_t len);
-        void UpdateRenderPostion(size_t len);
+        void UpdateRenderPostion(float len);
 
     public:
         bool SeekPlay(PlaySeekRequest* request);

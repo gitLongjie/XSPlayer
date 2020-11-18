@@ -13,7 +13,11 @@ namespace XSPlayer {
     }
 
     ListItem::~ListItem() {
+        if (nullptr == m_pListElementUI) {
+            return;
+        }
 
+     //   m_pListElementUI->OnNotify -= DuiLib::MakeDelegate<ListItem, ListItem>(this, &ListItem::Notify);;
     }
 
     DuiLib::CListContainerElementUI* ListItem::GetListElement(void) const {
@@ -45,7 +49,7 @@ namespace XSPlayer {
         }
         
         m_pListElementUI->SetTag(reinterpret_cast<UINT_PTR>(this));
-        m_pListElementUI->OnNotify += DuiLib::MakeDelegate<ListItem, ListItem>(this, &ListItem::Notify);
+  //      m_pListElementUI->OnNotify += DuiLib::MakeDelegate<ListItem, ListItem>(this, &ListItem::Notify);
         return m_bInited;
     }
 

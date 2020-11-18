@@ -45,27 +45,25 @@ namespace XSPlayer {
         {
         case WM_RIGHTPANNEL_INIT_DURATION: 
             InitPlaySolider(wParam, lParam);
-            break;
+            return 1;
 
         case WM_RIGHTPANNEL_UPDATE_DURATION:
             UpdatePlayPos(wParam, lParam);
-            break;
+            return 1;
 
-        case WM_OFFLINE_PLAY:
+        case WM_MEDIA_PLAY:
         {
-            m_mediaSoruce = MediaSourceType::MST_LOCAL;
             m_playStatus = PlayStatus::PS_Stop;
             OnBtnPlay();
         }
-            break;
+            return 1;
 
         case WM_ONLINE_PLAY:
         {
-            m_mediaSoruce = MediaSourceType::MST_9KU_SERVER;
             m_playStatus = PlayStatus::PS_Stop;
             OnBtnPlay();
         }
-        break;
+        return 1;
 
         case WM_MEDIA_LRC_LOADED:
         {
@@ -75,7 +73,7 @@ namespace XSPlayer {
 
             OnDisplayLrc(lrc);
         }
-        break;
+        return 1;
 
         default:
             break;
@@ -104,15 +102,7 @@ namespace XSPlayer {
         }
         m_lastPlayTime = now;
 
-        bool bPlaySuccess = false;
-        if (MediaSourceType::MST_LOCAL == m_mediaSoruce) {
-            bPlaySuccess = OnPlayLocalMedia();
-        }
-        else {
-            bPlaySuccess = OnPlayServerMedia();
-        }
-
-        return bPlaySuccess;
+        return OnPlayLocalMedia();
     }
 
     bool RightPannel::OnPlayMedida(DuiLib::CControlUI* pControl) {
@@ -130,16 +120,17 @@ namespace XSPlayer {
         mediaID = std::stoul(userData);
 #endif
 
+        size_t curMedia = MediaManager::GetSingleton().GetCurrentPlay();
+        if (mediaID == curMedia) {
+            return true;
+        }
+        m_nCurrentDuration = -1;
         MediaManager::GetSingleton().Stop();
         return MediaManager::GetSingleton().PlayMedia(mediaID);
 
     }
 
     bool RightPannel::OnPlayLocalMedia(void) {
-        if (MediaSourceType::MST_LOCAL != m_mediaSoruce) {
-            return false;
-        }
-        
         DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOfflineList));
         if (nullptr == pList) {
             return false;
@@ -153,24 +144,6 @@ namespace XSPlayer {
         return true;
     }
    
-    bool RightPannel::OnPlayServerMedia(void) {
-        if (MediaSourceType::MST_9KU_SERVER != m_mediaSoruce) {
-            return false;
-        }
-
-        DuiLib::CListUI* pList = static_cast<DuiLib::CListUI*>(m_pManager->FindControl(kOnlineList));
-        if (nullptr == pList) {
-            return false;
-        }
-
-        int index = pList->GetCurSel();
-        DuiLib::CControlUI* pControl = pList->GetItemAt(index);
-        if (!OnPlayMedida(pControl)) {
-            return false;
-        }
-        return true;
-    }
-
     bool RightPannel::PushToList(const std::vector<String>&& filePath) {
         if (filePath.empty()) {
             return false;
@@ -243,16 +216,21 @@ namespace XSPlayer {
     }
 
     void RightPannel::UpdatePlayPos(WPARAM wParam, LPARAM lParam) {
-        int nDuration = int(wParam);
+        float* pts = reinterpret_cast<float*>(wParam);
+        float duration = *pts;
+        delete pts;
+
+        int nDuration = int(duration);
        
-        if (m_bSeek) {
+        OnUpdateLrc(duration);
+        if (m_bSeek || m_nCurrentDuration == nDuration) {
             return;
         }
         m_pSliderPlayUI->SetValue(nDuration);
         m_nCurrentDuration = nDuration;
         UpdateTimeText();
 
-        OnUpdateLrc(nDuration);
+       
 
         if (m_nCurrentDuration >= m_nDuration) {
             OnBtnNext();
@@ -280,12 +258,7 @@ namespace XSPlayer {
     }
 
     void RightPannel::OnBtnNext() {
-        if (MediaSourceType::MST_LOCAL == m_mediaSoruce) {
-            SendMessage(m_pManager->GetPaintWindow(), WM_OFFLINE_NEXT, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
-        }
-        else {
-            SendMessage(m_pManager->GetPaintWindow(), WM_ONLINE_NEXT, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
-        }
+        SendMessage(m_pManager->GetPaintWindow(), WM_PLAY_MEDIA_NEXT, 0, 0);
         
     }
 
@@ -306,7 +279,7 @@ namespace XSPlayer {
     }
 
     void RightPannel::OnBtnLast() {
-        SendMessage(m_pManager->GetPaintWindow(), WM_CHANGE_LAST_PLAY, 0, reinterpret_cast<LPARAM>(&m_mediaSoruce));
+        SendMessage(m_pManager->GetPaintWindow(), WM_PLAY_MEDIA_LAST, 0, 0);
     }
 
     void RightPannel::OnBtnStop() {
@@ -350,7 +323,7 @@ namespace XSPlayer {
         m_pLrcPannel->UpdateContent(lrc);
     }
 
-    void RightPannel::OnUpdateLrc(size_t len) {
+    void RightPannel::OnUpdateLrc(float len) {
         if (nullptr == m_pLrcPannel) {
             return;
         }

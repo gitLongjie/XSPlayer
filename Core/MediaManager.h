@@ -62,6 +62,8 @@ namespace XSPlayer {
 
     public:
         bool AddMediaSource(MediaSourceFactory* pMediaSourceFactory);
+        bool AddMediaContainter(const String& type);
+        const MediaContainer* GetMediaContainer(const String& source) const;
 
     private:
         void Init(void);

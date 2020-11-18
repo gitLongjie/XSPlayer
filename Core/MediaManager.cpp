@@ -243,6 +243,25 @@ namespace XSPlayer {
         return m_pRoot->Add(pMediaContainer);
     }
 
+    bool MediaManager::AddMediaContainter(const String& type) {
+        Media* pFindMedia = m_pRoot->Find(type);
+        if (nullptr != pFindMedia) {
+            return false;
+        }
+
+        auto pContainer = new MediaContainer(type);
+        if (nullptr == pContainer) {
+            return false;
+        }
+
+        return m_pRoot->Add(pContainer);
+    }
+
+    const MediaContainer* MediaManager::GetMediaContainer(const String& source) const {
+        const Media* media = m_pRoot->Find(source);
+        return dynamic_cast<const MediaContainer*>(media);
+    }
+
     void MediaManager::Init(void) {
         m_pRoot = new MediaContainer("root");
     }
